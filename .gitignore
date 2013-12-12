@@ -1,3 +1,4 @@
+[Pp]roject[Ss]ettings/
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -6,3 +7,4 @@
 *.csproj
 *.unityproj
 *.sln
+*.meta
