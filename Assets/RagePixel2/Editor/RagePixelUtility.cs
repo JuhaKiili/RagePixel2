@@ -11,29 +11,17 @@ public static class RagePixelUtility
 
 	public static Vector2 LocalToUV(Vector3 localPosition, Sprite sprite)
 	{
-		Rect spriteUVRect = SpriteUV(sprite);
-		
 		Vector2 localNormalizedPosition = new Vector2(
 			Mathf.Clamp01((localPosition.x - sprite.bounds.min.x) / sprite.bounds.size.x),
 			Mathf.Clamp01((localPosition.y - sprite.bounds.min.y) / sprite.bounds.size.y)
 			);
 
 		Vector3 textureUV = new Vector2(
-			localNormalizedPosition.x * (sprite.rect.width / sprite.texture.width) + spriteUVRect.xMin,
-			localNormalizedPosition.y * (sprite.rect.height / sprite.texture.height) + spriteUVRect.yMin
+			localNormalizedPosition.x * (sprite.rect.width / sprite.texture.width) + sprite.textureRect.xMin,
+			localNormalizedPosition.y * (sprite.rect.height / sprite.texture.height) + sprite.textureRect.yMin
 			);
 
 		return textureUV;
-	}
-
-	public static Rect SpriteUV (Sprite sprite)
-	{
-		return new Rect (
-			sprite.rect.xMin / sprite.texture.width,
-			sprite.rect.yMin / sprite.texture.height,
-			sprite.rect.width / sprite.texture.width,
-			sprite.rect.height / sprite.texture.height
-			);
 	}
 
 	public static Vector3 LocalToWorld(Vector3 localPosition, Transform transform)
