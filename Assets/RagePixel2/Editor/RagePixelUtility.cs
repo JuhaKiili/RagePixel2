@@ -6,11 +6,17 @@ public static class RagePixelUtility
 {
 	public static Vector2 UVToPixel(Vector2 uv, Sprite sprite)
 	{
+		if (sprite == null)
+			return Vector2.zero;
+
 		return new Vector2(uv.x * sprite.texture.width, uv.y * sprite.texture.height);
 	}
 
 	public static Vector2 LocalToUV(Vector3 localPosition, Sprite sprite)
 	{
+		if (sprite == null)
+			return Vector2.zero;
+
 		Vector2 localNormalizedPosition = new Vector2(
 			Mathf.Clamp01((localPosition.x - sprite.bounds.min.x) / sprite.bounds.size.x),
 			Mathf.Clamp01((localPosition.y - sprite.bounds.min.y) / sprite.bounds.size.y)

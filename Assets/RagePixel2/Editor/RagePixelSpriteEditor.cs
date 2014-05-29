@@ -6,7 +6,9 @@ using System.Collections;
 [CustomEditor (typeof (RagePixelSprite))]
 public class RagePixelSpriteEditor : Editor
 {
-	public RagePixelSprite ragePixelSprite
+	private const float k_DefaultSceneButtonWidth = 32f;
+
+	public RagePixelSprite ragePixelSprite 
 	{
 		get { return (target as RagePixelSprite); }
 	}
@@ -25,56 +27,55 @@ public class RagePixelSpriteEditor : Editor
 	{
 		get { return spriteRenderer.sprite; }
 	}
-	
-	private bool colorPickerVisible
-	{
-		get
-		{
-			bool? visible = RagePixelReflection.GetEditorStatic("ColorPicker", "visible") as bool?;
-			return visible.GetValueOrDefault ();
-		}
-	}
 
-	private Color? colorPickerColor
-	{
-		get
-		{
-			bool? visible = RagePixelReflection.GetEditorStatic ("ColorPicker", "visible") as bool?;
-			if (visible.GetValueOrDefault())
-				return RagePixelReflection.GetEditorStatic("ColorPicker", "color") as Color?;
-			return null;
-		}
-		set { RagePixelReflection.SetEditorStatic ("ColorPicker", "color", new object[] { value }); }
-	}
-
-	private Color m_PaintColor;
 	public Color paintColor
 	{
-		get
-		{
-			if (colorPickerColor != null)
-				m_PaintColor = colorPickerColor.GetValueOrDefault();
-			return m_PaintColor;
-		}
+		get { return paintColorPickerGUI.selectedColor; }
 	}
 
-	private EditorWindow m_ColorPickerWindow;
 	public EditorWindow colorPickerWindow
 	{
 		get { return RagePixelReflection.GetEditorStatic ("ColorPicker", "get") as EditorWindow; }
 	}
 
+	private RagePixelColorPickerGUI m_PaintColorPickerGUI;
+	public RagePixelColorPickerGUI paintColorPickerGUI
+	{
+		get
+		{
+			if (m_PaintColorPickerGUI == null)
+			{
+				m_PaintColorPickerGUI = new RagePixelColorPickerGUI();
+				m_PaintColorPickerGUI.gizmoVisible = false;
+				m_PaintColorPickerGUI.visible = false;
+				m_PaintColorPickerGUI.gizmoPositionX = 5;
+				m_PaintColorPickerGUI.gizmoPositionY = 5;
+				m_PaintColorPickerGUI.positionX = m_PaintColorPickerGUI.gizmoPositionX + m_PaintColorPickerGUI.gizmoPixelWidth;
+				m_PaintColorPickerGUI.positionY = m_PaintColorPickerGUI.gizmoPositionY;
+			}
+			return m_PaintColorPickerGUI;
+		}
+	}
+
 	public override void OnInspectorGUI ()
 	{
-		if (GUILayout.Button ("Color Picker"))
-		{
-			colorPickerWindow.Show();
-			colorPickerColor = m_PaintColor;
-		}
+
 	}
 
 	public void OnSceneGUI ()
 	{
+		Handles.BeginGUI();
+		SceneViewToolbarOnGUI();
+		Handles.EndGUI();
+		
+		HandlePainting ();
+	}
+
+	private void HandlePainting ()
+	{
+		if (sprite == null)
+			return;
+
 		int id = GUIUtility.GetControlID ("Paint".GetHashCode (), FocusType.Passive);
 
 		if (Event.current.type == EventType.MouseDown)
@@ -85,12 +86,31 @@ public class RagePixelSpriteEditor : Editor
 		if (Event.current.type == EventType.MouseDrag)
 		{
 			Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-			sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, paintColor);
+			sprite.texture.SetPixel((int)pixel.x, (int)pixel.y, paintColor);
 			sprite.texture.Apply ();
 		}
 		if (Event.current.type == EventType.MouseUp)
-		{
 			GUIUtility.hotControl = 0;
+	}
+
+	private void SceneViewToolbarOnGUI ()
+	{
+		GUILayout.BeginVertical ();
+		HandleColorPickerGUI ();
+		GUILayout.EndVertical ();
+	}
+
+	public void HandleColorPickerGUI()
+	{
+		if (GUI.Button(paintColorPickerGUI.gizmoBounds, paintColorPickerGUI.colorGizmoTexture))
+			paintColorPickerGUI.visible = !paintColorPickerGUI.visible;
+
+		if (paintColorPickerGUI.visible)
+		{
+			if (paintColorPickerGUI.HandleGUIEvent (Event.current))
+				Event.current.Use ();
+			
+			GUI.DrawTexture(paintColorPickerGUI.bounds, paintColorPickerGUI.colorPickerTexture);
 		}
 	}
 
