@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.RagePixel2.Editor
@@ -32,6 +33,29 @@ namespace Assets.RagePixel2.Editor
 					s_Pencil = Base64ToTexture(s_PencilBase64);
 
 				return s_Pencil;
+			}
+		}
+
+		private static Material s_DefaultMaterial;
+		public static Material defaultMaterial
+		{
+			get
+			{
+				if (s_DefaultMaterial == null)
+				{
+					UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath("Assets/RagePixelDefault.mat", typeof(Material));
+					if (obj != null && obj as Material != null)
+					{
+						s_DefaultMaterial = obj as Material;
+					}
+					else
+					{
+						s_DefaultMaterial = new Material(Shader.Find("Sprites/Default"));
+						s_DefaultMaterial.SetInt ("Pixel snap", 1);
+						AssetDatabase.CreateAsset(s_DefaultMaterial, "Assets/RagePixelDefault.mat");
+					}
+				}
+				return s_DefaultMaterial;
 			}
 		}
 

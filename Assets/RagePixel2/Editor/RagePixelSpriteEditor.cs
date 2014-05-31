@@ -71,6 +71,7 @@ public class RagePixelSpriteEditor : Editor
 		gameObject.transform.position = RagePixelUtility.GetSceneViewCenter();
 		gameObject.AddComponent<RagePixelSprite>();
 		gameObject.GetComponent<SpriteRenderer>().sprite = RagePixelUtility.CreateNewSprite();
+		gameObject.GetComponent<SpriteRenderer>().sharedMaterial = RagePixelResources.defaultMaterial;
 		Selection.activeGameObject = gameObject;
 		SceneView.FrameLastActiveSceneView ();
 	}
@@ -155,7 +156,9 @@ public class RagePixelSpriteEditor : Editor
 
 	public void ArrowOnGUI ()
 	{
-		if (GUILayout.Toggle(mode == SceneMode.Default, RagePixelResources.arrow, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize)) && GUI.changed)
+		EditorGUI.BeginChangeCheck();
+		GUILayout.Toggle(mode == SceneMode.Default, RagePixelResources.arrow, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
+		if (EditorGUI.EndChangeCheck() && mode != SceneMode.Default)
 		{
 			Tools.current = s_PreviousTool;
 			mode = SceneMode.Default;
@@ -164,7 +167,9 @@ public class RagePixelSpriteEditor : Editor
 
 	public void PencilOnGUI ()
 	{
-		if (GUILayout.Toggle(mode == SceneMode.Paint, RagePixelResources.pencil, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize)) && GUI.changed)
+		EditorGUI.BeginChangeCheck();
+		GUILayout.Toggle(mode == SceneMode.Paint, RagePixelResources.pencil, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
+		if (EditorGUI.EndChangeCheck() && mode != SceneMode.Paint)
 		{
 			s_PreviousTool = Tools.current;
 			Tools.current = Tool.None;
