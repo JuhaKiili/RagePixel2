@@ -2,13 +2,14 @@ using System.IO;
 using System.Reflection;
 using Assets.RagePixel2.Editor;
 using UnityEditor;
+using UnityEditor.Graphs;
 using UnityEngine;
 using System.Collections;
 
 [CustomEditor (typeof (RagePixelSprite))]
 public class RagePixelSpriteEditor : Editor
 {
-	private const float k_DefaultSceneButtonWidth = 32f;
+	private const float k_SceneButtonSize = 32f;
 
 	public RagePixelSprite ragePixelSprite 
 	{
@@ -59,6 +60,10 @@ public class RagePixelSpriteEditor : Editor
 		}
 	}
 
+	private static Tool s_PreviousTool;
+	public enum SceneMode { Default=0, Paint }
+	public SceneMode mode = SceneMode.Default;
+
 	[MenuItem("GameObject/Create Other/RagePixel Sprite")]
 	public static void CreateSpriteMenuItem()
 	{
@@ -89,8 +94,20 @@ public class RagePixelSpriteEditor : Editor
 		if (sprite == null)
 			return;
 
-		int id = GUIUtility.GetControlID ("Paint".GetHashCode (), FocusType.Passive);
+		switch (mode)
+		{
+			case SceneMode.Default:
+				break;
+			case SceneMode.Paint:
+				HandleModePaint();
+				break;
+		}
+	}
 
+	private void HandleModePaint ()
+	{
+		int id = GUIUtility.GetControlID("Paint".GetHashCode(), FocusType.Passive);
+		
 		if (Event.current.type == EventType.MouseDown)
 		{
 			GUIUtility.hotControl = id;
@@ -99,7 +116,7 @@ public class RagePixelSpriteEditor : Editor
 		if (Event.current.type == EventType.MouseDrag)
 		{
 			Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-			sprite.texture.SetPixel((int)pixel.x, (int)pixel.y, paintColor);
+			sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, paintColor);
 			sprite.texture.Apply ();
 		}
 		if (Event.current.type == EventType.MouseUp)
@@ -124,7 +141,7 @@ public class RagePixelSpriteEditor : Editor
 
 	public void ColorPickerOnGUI ()
 	{
-		if (GUILayout.Button(paintColorPickerGUI.colorGizmoTexture, GUILayout.Width(k_DefaultSceneButtonWidth), GUILayout.Height(k_DefaultSceneButtonWidth)))
+		if (GUILayout.Button(paintColorPickerGUI.colorGizmoTexture, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize)))
 			paintColorPickerGUI.visible = !paintColorPickerGUI.visible;
 
 		if (paintColorPickerGUI.visible)
@@ -138,17 +155,20 @@ public class RagePixelSpriteEditor : Editor
 
 	public void ArrowOnGUI ()
 	{
-		if (GUILayout.Button(RagePixelResources.arrow, GUILayout.Width(k_DefaultSceneButtonWidth), GUILayout.Height(k_DefaultSceneButtonWidth)))
+		if (GUILayout.Toggle(mode == SceneMode.Default, RagePixelResources.arrow, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize)) && GUI.changed)
 		{
-			Debug.Log("arrow");
+			Tools.current = s_PreviousTool;
+			mode = SceneMode.Default;
 		}
 	}
 
 	public void PencilOnGUI ()
 	{
-		if (GUILayout.Button(RagePixelResources.pencil, GUILayout.Width(k_DefaultSceneButtonWidth), GUILayout.Height(k_DefaultSceneButtonWidth)))
+		if (GUILayout.Toggle(mode == SceneMode.Paint, RagePixelResources.pencil, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize)) && GUI.changed)
 		{
-			Debug.Log("Pencil");
+			s_PreviousTool = Tools.current;
+			Tools.current = Tool.None;
+			mode = SceneMode.Paint;
 		}
 	}
 
