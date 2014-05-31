@@ -90,6 +90,11 @@ public class RagePixelSpriteEditor : Editor
 		HandlePainting ();
 	}
 
+	public void Update()
+	{
+		
+	}
+
 	private void HandlePainting ()
 	{
 		if (sprite == null)
@@ -108,20 +113,29 @@ public class RagePixelSpriteEditor : Editor
 	private void HandleModePaint ()
 	{
 		int id = GUIUtility.GetControlID("Paint".GetHashCode(), FocusType.Passive);
-		
-		if (Event.current.type == EventType.MouseDown)
+		EditorGUIUtility.AddCursorRect(new Rect(0, 0, 10000, 10000), MouseCursor.ArrowPlus);
+	
+		switch (Event.current.type)
 		{
-			GUIUtility.hotControl = id;
-			Event.current.Use ();
+			case (EventType.MouseDown):
+				GUIUtility.hotControl = id;
+				Event.current.Use ();
+				break;
+			case (EventType.MouseDrag):
+				Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
+				sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, paintColor);
+				sprite.texture.Apply ();
+				break;
+			case (EventType.MouseMove):
+				SceneView.RepaintAll();
+				break;
+			case (EventType.MouseUp):
+				GUIUtility.hotControl = 0;
+				break;
+			case (EventType.Repaint):
+				DrawPaintGizmo();
+				break;
 		}
-		if (Event.current.type == EventType.MouseDrag)
-		{
-			Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-			sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, paintColor);
-			sprite.texture.Apply ();
-		}
-		if (Event.current.type == EventType.MouseUp)
-			GUIUtility.hotControl = 0;
 	}
 
 	private void SceneViewToolbarOnGUI ()
@@ -175,6 +189,39 @@ public class RagePixelSpriteEditor : Editor
 			Tools.current = Tool.None;
 			mode = SceneMode.Paint;
 		}
+	}
+
+	private void DrawPaintGizmo ()
+	{
+		Vector2 p = ScreenToPixel(Event.current.mousePosition);
+
+		Vector2[] uvPoints = new Vector2[4];
+		uvPoints[0] = RagePixelUtility.PixelToUV(new Vector2(Mathf.FloorToInt(p.x), Mathf.FloorToInt(p.y)), sprite);
+		uvPoints[1] = RagePixelUtility.PixelToUV(new Vector2(Mathf.FloorToInt(p.x) + 1, Mathf.FloorToInt(p.y)), sprite);
+		uvPoints[2] = RagePixelUtility.PixelToUV(new Vector2(Mathf.FloorToInt(p.x) + 1, Mathf.FloorToInt(p.y) + 1), sprite);
+		uvPoints[3] = RagePixelUtility.PixelToUV(new Vector2(Mathf.FloorToInt(p.x), Mathf.FloorToInt(p.y) + 1), sprite);
+
+		Vector3[] worldPoints = new Vector3[5];
+		worldPoints[0] = transform.TransformPoint(RagePixelUtility.UVToLocal(uvPoints[0], sprite));
+		worldPoints[1] = transform.TransformPoint(RagePixelUtility.UVToLocal(uvPoints[1], sprite));
+		worldPoints[2] = transform.TransformPoint(RagePixelUtility.UVToLocal(uvPoints[2], sprite));
+		worldPoints[3] = transform.TransformPoint(RagePixelUtility.UVToLocal(uvPoints[3], sprite));
+		worldPoints[4] = worldPoints[0];
+
+		Vector3[] screenPoints = new Vector3[5];
+		for (int i = 0; i < worldPoints.Length; i++)
+			screenPoints[i] = RagePixelUtility.WorldToScreen(worldPoints[i], transform);
+
+		Vector3[] shadowPoints = new Vector3[5];
+		for (int i = 0; i < screenPoints.Length; i++)
+			shadowPoints[i] = screenPoints[i] + new Vector3(1f, 1f, 0f);
+
+		Handles.BeginGUI();
+		Handles.color = Color.black;
+		Handles.DrawPolyLine(shadowPoints);
+		Handles.color = Color.white;
+		Handles.DrawPolyLine(screenPoints);
+		Handles.EndGUI();
 	}
 
 	private Vector2 ScreenToPixel (Vector2 screenPosition)

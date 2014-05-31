@@ -6,12 +6,22 @@ using System.Collections;
 
 public static class RagePixelUtility 
 {
+	private const float k_UVEpsilon = 0.00001f;
+
 	public static Vector2 UVToPixel(Vector2 uv, Sprite sprite)
 	{
 		if (sprite == null)
 			return Vector2.zero;
 
-		return new Vector2(uv.x * sprite.texture.width, uv.y * sprite.texture.height);
+		return new Vector2(Mathf.Min(uv.x, 1.0f - k_UVEpsilon) * sprite.texture.width, Mathf.Min(uv.y, 1.0f - k_UVEpsilon) * sprite.texture.height);
+	}
+
+	public static Vector2 PixelToUV(Vector2 pixel, Sprite sprite)
+	{
+		if (sprite == null)
+			return Vector2.zero;
+
+		return new Vector2(pixel.x / sprite.texture.width, pixel.y / sprite.texture.height);
 	}
 
 	public static Vector2 LocalToUV(Vector3 localPosition, Sprite sprite)
@@ -30,6 +40,24 @@ public static class RagePixelUtility
 			);
 
 		return textureUV;
+	}
+
+	public static Vector3 UVToLocal(Vector2 uv, Sprite sprite)
+	{
+		if (sprite == null)
+			return Vector2.zero;
+
+		Vector2 localNormalizedPosition = new Vector2(
+			Mathf.Clamp01((uv.x - sprite.textureRect.xMin) / (sprite.rect.width / sprite.texture.width)),
+			Mathf.Clamp01((uv.y - sprite.textureRect.yMin) / (sprite.rect.height / sprite.texture.height))
+			);
+
+		Vector2 localPosition = new Vector2(
+			localNormalizedPosition.x * sprite.bounds.size.x + sprite.bounds.min.x,
+			localNormalizedPosition.y * sprite.bounds.size.y + sprite.bounds.min.y
+			);
+
+		return localPosition;
 	}
 
 	public static Vector3 LocalToWorld(Vector3 localPosition, Transform transform)
