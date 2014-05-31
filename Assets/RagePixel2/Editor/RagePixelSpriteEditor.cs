@@ -1,5 +1,6 @@
 using System.IO;
 using System.Reflection;
+using Assets.RagePixel2.Editor;
 using UnityEditor;
 using UnityEngine;
 using System.Collections;
@@ -71,8 +72,7 @@ public class RagePixelSpriteEditor : Editor
 	
 	public override void OnInspectorGUI ()
 	{
-		if (GUILayout.Button ("Create"))
-			spriteRenderer.sprite = RagePixelUtility.CreateNewSprite ();
+
 	}
 
 	public void OnSceneGUI ()
@@ -108,14 +108,23 @@ public class RagePixelSpriteEditor : Editor
 
 	private void SceneViewToolbarOnGUI ()
 	{
-		GUILayout.BeginVertical ();
-		HandleColorPickerGUI ();
-		GUILayout.EndVertical ();
+		GUILayout.BeginArea(new Rect(2, 2, 500, 200));
+		GUILayout.BeginHorizontal();
+		ColorPickerOnGUI ();
+		GUILayout.EndHorizontal();
+		GUILayout.EndArea();
+
+		GUILayout.FlexibleSpace();
+		GUILayout.BeginVertical();
+		ArrowOnGUI();
+		PencilOnGUI();
+		GUILayout.EndVertical();
+		GUILayout.FlexibleSpace();
 	}
 
-	public void HandleColorPickerGUI()
+	public void ColorPickerOnGUI ()
 	{
-		if (GUI.Button(paintColorPickerGUI.gizmoBounds, paintColorPickerGUI.colorGizmoTexture))
+		if (GUILayout.Button(paintColorPickerGUI.colorGizmoTexture, GUILayout.Width(k_DefaultSceneButtonWidth), GUILayout.Height(k_DefaultSceneButtonWidth)))
 			paintColorPickerGUI.visible = !paintColorPickerGUI.visible;
 
 		if (paintColorPickerGUI.visible)
@@ -124,6 +133,22 @@ public class RagePixelSpriteEditor : Editor
 				Event.current.Use ();
 			
 			GUI.DrawTexture(paintColorPickerGUI.bounds, paintColorPickerGUI.colorPickerTexture);
+		}
+	}
+
+	public void ArrowOnGUI ()
+	{
+		if (GUILayout.Button(RagePixelResources.arrow, GUILayout.Width(k_DefaultSceneButtonWidth), GUILayout.Height(k_DefaultSceneButtonWidth)))
+		{
+			Debug.Log("arrow");
+		}
+	}
+
+	public void PencilOnGUI ()
+	{
+		if (GUILayout.Button(RagePixelResources.pencil, GUILayout.Width(k_DefaultSceneButtonWidth), GUILayout.Height(k_DefaultSceneButtonWidth)))
+		{
+			Debug.Log("Pencil");
 		}
 	}
 
