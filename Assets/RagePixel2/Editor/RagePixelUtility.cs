@@ -1,3 +1,5 @@
+using System.IO;
+using System.Net.Mime;
 using UnityEditor;
 using UnityEngine;
 using System.Collections;
@@ -60,5 +62,66 @@ public static class RagePixelUtility
 		Handles.DrawLine(point + Vector3.up * size, point + Vector3.down * size);
 		Handles.DrawLine(point + Vector3.left * size, point + Vector3.right * size);
 		Handles.DrawLine(point + Vector3.forward * size, point + Vector3.back * size);
+	}
+
+	public static Sprite CreateNewSprite ()
+	{
+		string path = EditorUtility.SaveFilePanelInProject("New Sprite", "sprite", "png", "Save New Sprite");
+
+		if (path.Length > 0)
+			return CreateNewSprite (path);
+		
+		return null;
+	}
+
+	public static Vector3 GetSceneViewCenter()
+	{
+		if (SceneView.lastActiveSceneView != null && SceneView.lastActiveSceneView.camera != null)
+		{
+			Camera sceneCamera = SceneView.lastActiveSceneView.camera;
+			Plane plane = new Plane(Vector3.forward, Vector3.zero);
+			float result = 0f;
+			Ray ray = sceneCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+			if (plane.Raycast(ray, out result))
+				return ray.GetPoint(result);
+		}
+		return Vector3.zero;
+	}
+
+	private static Sprite CreateNewSprite (string path)
+	{
+		Texture2D newTexture = CreateDefaultSpriteTexture();
+
+		File.WriteAllBytes(path, newTexture.EncodeToPNG());
+		newTexture = null;
+
+		AssetDatabase.ImportAsset(path);
+		TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+
+		if (textureImporter == null)
+			return null;
+
+		SetDefaultSpriteSettings(ref textureImporter);
+
+		AssetDatabase.ImportAsset(path);
+		Object[] assets = AssetDatabase.LoadAllAssetsAtPath(path);
+
+		if (assets.Length <= 1 || assets[1] as Sprite == null)
+			return null;
+
+		return assets[1] as Sprite;
+	}
+
+	private static void SetDefaultSpriteSettings (ref TextureImporter textureImporter)
+	{
+		textureImporter.textureFormat = TextureImporterFormat.ARGB32;
+		textureImporter.textureType = TextureImporterType.Sprite;
+		textureImporter.filterMode = FilterMode.Point;
+		textureImporter.isReadable = true;
+	}
+
+	private static Texture2D CreateDefaultSpriteTexture ()
+	{
+		return new Texture2D (32, 32);
 	}
 }

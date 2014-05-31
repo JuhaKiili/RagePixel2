@@ -1,3 +1,4 @@
+using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -57,9 +58,21 @@ public class RagePixelSpriteEditor : Editor
 		}
 	}
 
+	[MenuItem("GameObject/Create Other/RagePixel Sprite")]
+	public static void CreateSpriteMenuItem()
+	{
+		GameObject gameObject = new GameObject();
+		gameObject.transform.position = RagePixelUtility.GetSceneViewCenter();
+		gameObject.AddComponent<RagePixelSprite>();
+		gameObject.GetComponent<SpriteRenderer>().sprite = RagePixelUtility.CreateNewSprite();
+		Selection.activeGameObject = gameObject;
+		SceneView.FrameLastActiveSceneView ();
+	}
+	
 	public override void OnInspectorGUI ()
 	{
-
+		if (GUILayout.Button ("Create"))
+			spriteRenderer.sprite = RagePixelUtility.CreateNewSprite ();
 	}
 
 	public void OnSceneGUI ()
