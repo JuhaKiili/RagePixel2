@@ -121,6 +121,19 @@ public static class RagePixelUtility
 		return Vector3.zero;
 	}
 
+	public static void SaveImageData (Sprite sprite)
+	{
+		Texture2D texture = sprite.texture;
+		string path = AssetDatabase.GetAssetPath (texture);
+		TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+
+		if (textureImporter == null)
+			return;
+
+		File.WriteAllBytes (path, texture.EncodeToPNG());
+		//AssetDatabase.ImportAsset(path);
+	}
+
 	private static Sprite CreateNewSprite (string path)
 	{
 		Texture2D newTexture = CreateDefaultSpriteTexture();

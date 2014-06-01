@@ -130,6 +130,7 @@ public class RagePixelSpriteEditor : Editor
 				SceneView.RepaintAll();
 				break;
 			case (EventType.MouseUp):
+				RagePixelUtility.SaveImageData(sprite);
 				GUIUtility.hotControl = 0;
 				break;
 			case (EventType.Repaint):
