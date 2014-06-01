@@ -126,7 +126,7 @@ public static class RagePixelUtility
 		Texture2D newTexture = CreateDefaultSpriteTexture();
 
 		File.WriteAllBytes(path, newTexture.EncodeToPNG());
-		newTexture = null;
+		Texture2D.Destroy (newTexture);
 
 		AssetDatabase.ImportAsset(path);
 		TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
