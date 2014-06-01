@@ -70,6 +70,11 @@ public static class RagePixelUtility
 		return transform.InverseTransformPoint(ScreenToWorld(screenPosition, transform));
 	}
 
+	public static Vector2 LocalToScreen(Vector3 localPosition, Transform transform)
+	{
+		return WorldToScreen (transform.TransformPoint(localPosition), transform);
+	}
+
 	public static Vector3 ScreenToWorld(Vector2 screenPosition, Transform transform)
 	{
 		Ray mouseRay = HandleUtility.GUIPointToWorldRay(screenPosition);
