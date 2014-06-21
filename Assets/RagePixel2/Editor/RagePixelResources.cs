@@ -62,6 +62,7 @@ namespace Assets.RagePixel2.Editor
 		private static Texture2D Base64ToTexture (string base64)
 		{
 			Texture2D t = new Texture2D(1,1);
+			t.hideFlags = HideFlags.HideAndDontSave;
 			t.LoadImage(System.Convert.FromBase64String(base64));
 			return t;
 		}
