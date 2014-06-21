@@ -60,6 +60,8 @@ public class RagePixelSpriteEditor : Editor
 		}
 	}
 
+	private bool m_MouseIsDown;
+
 	private Tool m_PreviousTool;
 	
 	public enum SceneMode { Default=0, Paint }
@@ -156,20 +158,35 @@ public class RagePixelSpriteEditor : Editor
 		switch (Event.current.type)
 		{
 			case (EventType.MouseDown):
-				GUIUtility.hotControl = id;
+				m_MouseIsDown = true;
+				if (Event.current.button == 0)
+				{
+					GUIUtility.hotControl = id;
+				}
+				else
+				{
+					Vector2 p = ScreenToPixel(Event.current.mousePosition);
+					m_PaintColorPickerGUI.selectedColor = sprite.texture.GetPixel ((int) p.x, (int) p.y);
+				}
 				Event.current.Use ();
 				break;
 			case (EventType.MouseDrag):
-				Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-				sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, paintColor);
-				sprite.texture.Apply ();
+				if (Event.current.button == 0)
+				{
+					Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
+					sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, paintColor);
+					sprite.texture.Apply ();
+				}
 				break;
 			case (EventType.MouseMove):
 				SceneView.RepaintAll();
 				break;
 			case (EventType.MouseUp):
-				RagePixelUtility.SaveImageData(sprite);
+				m_MouseIsDown = false;
+				if (Event.current.button == 0)
+					RagePixelUtility.SaveImageData(sprite);
 				GUIUtility.hotControl = 0;
+				Event.current.Use();
 				break;
 			case (EventType.Repaint):
 				DrawPaintGizmo();
@@ -239,9 +256,9 @@ public class RagePixelSpriteEditor : Editor
 			shadowPolyLine[i] = screenPolyLine[i] + new Vector3(1f, 1f, 0f);
 
 		Handles.BeginGUI();
-		Handles.color = Color.black;
+		Handles.color = m_MouseIsDown ? Color.black : new Color(0f, 0f, 0f, 0.4f);
 		Handles.DrawPolyLine(shadowPolyLine);
-		Handles.color = Color.white;
+		Handles.color = m_MouseIsDown ? Color.white : new Color(1f, 1f, 1f, 0.4f);
 		Handles.DrawPolyLine(screenPolyLine);
 		Handles.EndGUI();
 	}
