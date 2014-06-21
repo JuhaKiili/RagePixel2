@@ -51,7 +51,7 @@ namespace Assets.RagePixel2.Editor
 					else
 					{
 						s_DefaultMaterial = new Material(Shader.Find("Sprites/Default"));
-						s_DefaultMaterial.SetInt ("Pixel snap", 1);
+						s_DefaultMaterial.SetInt ("PixelSnap", 1);
 						AssetDatabase.CreateAsset(s_DefaultMaterial, "Assets/RagePixelDefault.mat");
 					}
 				}
