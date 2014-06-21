@@ -68,6 +68,7 @@ public class RagePixelSpriteEditor : Editor
 	public static void CreateSpriteMenuItem()
 	{
 		GameObject gameObject = new GameObject();
+		gameObject.name = "New Sprite";
 		gameObject.transform.position = RagePixelUtility.GetSceneViewCenter();
 		gameObject.AddComponent<RagePixelSprite>();
 		gameObject.GetComponent<SpriteRenderer>().sprite = RagePixelUtility.CreateNewSprite();
