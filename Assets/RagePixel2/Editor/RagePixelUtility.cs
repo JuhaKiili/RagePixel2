@@ -161,7 +161,9 @@ public static class RagePixelUtility
 	private static void SetDefaultSpriteSettings (ref TextureImporter textureImporter)
 	{
 		textureImporter.textureFormat = TextureImporterFormat.ARGB32;
-		textureImporter.textureType = TextureImporterType.Sprite;
+		textureImporter.textureType = TextureImporterType.Advanced;
+		textureImporter.spriteImportMode = SpriteImportMode.Single;
+		textureImporter.npotScale = TextureImporterNPOTScale.None;
 		textureImporter.filterMode = FilterMode.Point;
 		textureImporter.isReadable = true;
 	}
