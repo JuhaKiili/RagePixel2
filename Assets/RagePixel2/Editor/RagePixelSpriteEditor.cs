@@ -60,9 +60,36 @@ public class RagePixelSpriteEditor : Editor
 		}
 	}
 
-	private static Tool s_PreviousTool;
+	[SerializeField] private static Tool s_PreviousTool;
+	
 	public enum SceneMode { Default=0, Paint }
-	public SceneMode mode = SceneMode.Default;
+	[SerializeField] private SceneMode m_Mode = SceneMode.Default;
+	public SceneMode mode
+	{
+		get { return m_Mode; }
+		set
+		{
+			if (m_Mode != value)
+			{
+				OnModeChange (m_Mode, value);
+				m_Mode = value;
+			}
+		}
+	}
+
+	private void OnModeChange (SceneMode oldMode, SceneMode newMode)
+	{
+		if (newMode != SceneMode.Default)
+		{
+			if (oldMode == SceneMode.Default)
+				s_PreviousTool = Tools.current;
+			Tools.current = Tool.None;
+		}
+		else
+		{
+			Tools.current = s_PreviousTool != Tool.None ? s_PreviousTool : Tool.Move;
+		}
+	}
 
 	[MenuItem("GameObject/Create Other/RagePixel Sprite")]
 	public static void CreateSpriteMenuItem()
@@ -175,10 +202,7 @@ public class RagePixelSpriteEditor : Editor
 		EditorGUI.BeginChangeCheck();
 		GUILayout.Toggle(mode == SceneMode.Default, RagePixelResources.arrow, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
 		if (EditorGUI.EndChangeCheck() && mode != SceneMode.Default)
-		{
-			Tools.current = s_PreviousTool != Tool.None ? s_PreviousTool : Tool.Move;
 			mode = SceneMode.Default;
-		}
 	}
 
 	public void PencilOnGUI ()
@@ -186,11 +210,7 @@ public class RagePixelSpriteEditor : Editor
 		EditorGUI.BeginChangeCheck();
 		GUILayout.Toggle(mode == SceneMode.Paint, RagePixelResources.pencil, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
 		if (EditorGUI.EndChangeCheck() && mode != SceneMode.Paint)
-		{
-			s_PreviousTool = Tools.current;
-			Tools.current = Tool.None;
 			mode = SceneMode.Paint;
-		}
 	}
 
 	private void DrawPaintGizmo ()
