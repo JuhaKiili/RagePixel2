@@ -60,10 +60,10 @@ public class RagePixelSpriteEditor : Editor
 		}
 	}
 
-	[SerializeField] private static Tool s_PreviousTool;
+	private Tool m_PreviousTool;
 	
 	public enum SceneMode { Default=0, Paint }
-	[SerializeField] private SceneMode m_Mode = SceneMode.Default;
+	private SceneMode m_Mode;
 	public SceneMode mode
 	{
 		get { return m_Mode; }
@@ -82,12 +82,12 @@ public class RagePixelSpriteEditor : Editor
 		if (newMode != SceneMode.Default)
 		{
 			if (oldMode == SceneMode.Default)
-				s_PreviousTool = Tools.current;
+				m_PreviousTool = Tools.current;
 			Tools.current = Tool.None;
 		}
 		else
 		{
-			Tools.current = s_PreviousTool != Tool.None ? s_PreviousTool : Tool.Move;
+			Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
 		}
 	}
 
@@ -121,6 +121,16 @@ public class RagePixelSpriteEditor : Editor
 	public void Update()
 	{
 		
+	}
+
+	public void OnEnable()
+	{
+		m_PreviousTool = Tools.current;
+	}
+
+	public void OnDisable ()
+	{
+		Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
 	}
 
 	private void HandlePainting ()
