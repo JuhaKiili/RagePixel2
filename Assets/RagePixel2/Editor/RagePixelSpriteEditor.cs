@@ -176,7 +176,7 @@ public class RagePixelSpriteEditor : Editor
 		GUILayout.Toggle(mode == SceneMode.Default, RagePixelResources.arrow, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
 		if (EditorGUI.EndChangeCheck() && mode != SceneMode.Default)
 		{
-			Tools.current = s_PreviousTool;
+			Tools.current = s_PreviousTool != Tool.None ? s_PreviousTool : Tool.Move;
 			mode = SceneMode.Default;
 		}
 	}
