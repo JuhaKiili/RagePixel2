@@ -61,7 +61,7 @@ public class RagePixelSpriteEditor : Editor
 	}
 
 	private bool m_MouseIsDown;
-
+	private Vector2 m_LastMousePixel;
 	private Tool m_PreviousTool;
 	
 	public enum SceneMode { Default=0, Paint }
@@ -159,23 +159,22 @@ public class RagePixelSpriteEditor : Editor
 		{
 			case (EventType.MouseDown):
 				m_MouseIsDown = true;
+				Vector2 p = ScreenToPixel(Event.current.mousePosition);
+				
 				if (Event.current.button == 0)
-				{
 					GUIUtility.hotControl = id;
-				}
 				else
-				{
-					Vector2 p = ScreenToPixel(Event.current.mousePosition);
 					m_PaintColorPickerGUI.selectedColor = sprite.texture.GetPixel ((int) p.x, (int) p.y);
-				}
+
+				m_LastMousePixel = p;
 				Event.current.Use ();
 				break;
 			case (EventType.MouseDrag):
 				if (Event.current.button == 0)
 				{
 					Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-					sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, paintColor);
-					sprite.texture.Apply ();
+					RagePixelUtility.DrawPixelLine(sprite.texture, paintColor, (int)m_LastMousePixel.x, (int)m_LastMousePixel.y, (int)pixel.x, (int)pixel.y);
+					m_LastMousePixel = pixel;
 				}
 				break;
 			case (EventType.MouseMove):
