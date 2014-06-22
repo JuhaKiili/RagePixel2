@@ -227,40 +227,18 @@ public class RagePixelEditorWindow : EditorWindow
 
 	private void DrawPaintGizmo ()
 	{
-		Vector2 pixel = ScreenToPixel(Event.current.mousePosition);
-
-		Vector3[] screenPolyLine = new Vector3[5];
-		screenPolyLine[0] = PixelToScreen(new Vector2(Mathf.FloorToInt(pixel.x), Mathf.FloorToInt(pixel.y)));
-		screenPolyLine[1] = PixelToScreen(new Vector2(Mathf.FloorToInt(pixel.x+1), Mathf.FloorToInt(pixel.y)));
-		screenPolyLine[2] = PixelToScreen(new Vector2(Mathf.FloorToInt(pixel.x+1), Mathf.FloorToInt(pixel.y+1)));
-		screenPolyLine[3] = PixelToScreen(new Vector2(Mathf.FloorToInt(pixel.x), Mathf.FloorToInt(pixel.y+1)));
-		screenPolyLine[4] = screenPolyLine[0];
-
-		Vector3[] shadowPolyLine = new Vector3[5];
-		for (int i = 0; i < screenPolyLine.Length; i++)
-			shadowPolyLine[i] = screenPolyLine[i] + new Vector3(1f, 1f, 0f);
-
-		Handles.BeginGUI();
-		Handles.color = m_MouseIsDown ? Color.black : new Color(0f, 0f, 0f, 0.4f);
-		Handles.DrawPolyLine(shadowPolyLine);
-		Handles.color = m_MouseIsDown ? Color.white : new Color(1f, 1f, 1f, 0.4f);
-		Handles.DrawPolyLine(screenPolyLine);
-		Handles.EndGUI();
+		Color color = m_MouseIsDown ? Color.white : new Color(1f, 1f, 1f, 0.4f);
+		Color shadowColor = m_MouseIsDown ? Color.black : new Color(0f, 0f, 0f, 0.4f);
+		RagePixelUtility.DrawPaintGizmo (color, shadowColor, transform, sprite);
 	}
 
 	private Vector2 ScreenToPixel (Vector2 screenPosition)
 	{
-		Vector3 localPosition = RagePixelUtility.ScreenToLocal (screenPosition, transform);
-		Vector2 uvPosition = RagePixelUtility.LocalToUV(localPosition, sprite);
-		Vector2 pixelPosition = RagePixelUtility.UVToPixel(uvPosition, sprite);
-		return pixelPosition;
+		return RagePixelUtility.ScreenToPixel(screenPosition, transform, sprite);
 	}
 
 	private Vector2 PixelToScreen(Vector2 pixelPosition)
 	{
-		Vector2 uvPosition = RagePixelUtility.PixelToUV(pixelPosition, sprite);
-		Vector3 localPosition = RagePixelUtility.UVToLocal(uvPosition, sprite);
-		Vector2 screenPosition = RagePixelUtility.LocalToScreen(localPosition, transform);
-		return screenPosition;
+		return RagePixelUtility.PixelToScreen(pixelPosition, transform, sprite);
 	}
 }
