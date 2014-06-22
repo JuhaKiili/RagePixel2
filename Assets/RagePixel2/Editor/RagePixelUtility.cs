@@ -107,6 +107,27 @@ public static class RagePixelUtility
 		texture.Apply();
 	}
 
+	public static Color PaintColorField(Color value, float width, float height)
+	{
+		// internal static Color ColorField (Rect position, GUIContent label, Color value, bool showEyedropper, bool showAlpha)
+		object[] parameters = new object[5];
+		parameters[0] = EditorGUILayout.GetControlRect(false, GUILayout.Width(width), GUILayout.Height(height));
+		parameters[1] = new GUIContent("");
+		parameters[2] = value;
+		parameters[3] = false;
+		parameters[4] = true;
+
+		Type[] types = new Type[5];
+		types[0] = typeof(Rect);
+		types[1] = typeof(GUIContent);
+		types[2] = typeof(Color);
+		types[3] = typeof(bool);
+		types[4] = typeof(bool);
+
+		object returnValue = RagePixelReflection.InvokeEditorStatic("EditorGUI", "ColorField", parameters, types);
+		return (Color)returnValue;
+	}
+
 	// http://ericw.ca/notes/bresenhams-line-algorithm-in-csharp.html
 	private static IEnumerable<Vector2> GetPointsOnLine(int x0, int y0, int x1, int y1)
 	{

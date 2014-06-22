@@ -206,27 +206,7 @@ public class RagePixelEditorWindow : EditorWindow
 
 	public void PaintColorOnGUI ()
 	{
-		// internal static Color ColorField (Rect position, GUIContent label, Color value, bool showEyedropper, bool showAlpha)
-		object[] parameters = new object[5];
-		parameters[0] = EditorGUILayout.GetControlRect(false, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
-		parameters[1] = new GUIContent ("");
-		parameters[2] = m_PaintColor;
-		parameters[3] = false;
-		parameters[4] = true;
-
-		Type[] types = new Type[5];
-		types[0] = typeof (Rect);
-		types[1] = typeof (GUIContent);
-		types[2] = typeof (Color);
-		types[3] = typeof (bool);
-		types[4] = typeof (bool);
-		
-		//Debug.Log(RagePixelReflection.GetEditorType("EditorGUI"));
-		object returnValue = RagePixelReflection.InvokeEditorStatic("EditorGUI", "ColorField", parameters, types);
-		m_PaintColor = (Color)returnValue;
-
-		//const float k_ColorPipetteIconWidth = 20f;
-		//m_PaintColor = EditorGUILayout.ColorField (m_PaintColor, GUILayout.Width (k_SceneButtonSize + k_ColorPipetteIconWidth));
+		m_PaintColor = RagePixelUtility.PaintColorField (m_PaintColor, k_SceneButtonSize, k_SceneButtonSize);
 	}
 
 	public void ArrowOnGUI ()
