@@ -166,42 +166,62 @@ public class RagePixelEditorWindow : EditorWindow
 		switch (Event.current.type)
 		{
 			case (EventType.MouseDown):
-				m_MouseIsDown = true;
-				Vector2 p = ScreenToPixel(Event.current.mousePosition);
-				
-				if (Event.current.button == 0)
-					GUIUtility.hotControl = id;
-				else
-					m_PaintColor = sprite.texture.GetPixel((int)p.x, (int)p.y);
-
-				m_LastMousePixel = p;
-				Event.current.Use ();
-				Repaint();
+				GUIUtility.hotControl = id;
+				HandleModePaintOnMouseDown ();
 				break;
 			case (EventType.MouseDrag):
-				if (Event.current.button == 0)
-				{
-					Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-					if (m_LastMousePixel != null)
-						RagePixelUtility.DrawPixelLine(sprite.texture, m_PaintColor, (int)m_LastMousePixel.Value.x, (int)m_LastMousePixel.Value.y, (int)pixel.x, (int)pixel.y);
-					m_LastMousePixel = pixel;
-				}
+				HandleModePaintOnMouseDrag ();
 				break;
 			case (EventType.MouseMove):
 				SceneView.RepaintAll();
 				break;
 			case (EventType.MouseUp):
-				m_MouseIsDown = false;
-				m_LastMousePixel = null;
-				if (Event.current.button == 0)
-					RagePixelUtility.SaveImageData(sprite);
+				HandleModePaintOnMouseUp ();
 				GUIUtility.hotControl = 0;
-				Event.current.Use();
 				break;
 			case (EventType.Repaint):
 				DrawPaintGizmo();
 				break;
 		}
+	}
+
+	private void HandleModePaintOnMouseUp ()
+	{
+		m_MouseIsDown = false;
+		m_LastMousePixel = null;
+		if (Event.current.button == 0)
+			RagePixelUtility.SaveImageData (sprite);
+		Event.current.Use ();
+	}
+
+	private void HandleModePaintOnMouseDrag ()
+	{
+		if (Event.current.button != 0)
+			return;
+
+		Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
+		if (m_LastMousePixel != null)
+			RagePixelUtility.DrawPixelLine (sprite.texture, m_PaintColor, (int) m_LastMousePixel.Value.x, (int) m_LastMousePixel.Value.y, (int) pixel.x, (int) pixel.y);
+		
+		m_LastMousePixel = pixel;
+	}
+
+	private void HandleModePaintOnMouseDown ()
+	{
+		m_MouseIsDown = true;
+		Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
+
+		if (Event.current.button == 0)
+		{
+			sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, m_PaintColor);
+			sprite.texture.Apply ();
+		}
+		else
+			m_PaintColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
+
+		m_LastMousePixel = pixel;
+		Event.current.Use ();
+		Repaint ();
 	}
 
 	public void PaintColorOnGUI ()
