@@ -87,6 +87,7 @@ public class RagePixelEditorWindow : EditorWindow
 	{
 		GameObject gameObject = new GameObject();
 		gameObject.name = "New Sprite";
+		gameObject.AddComponent<SpriteRenderer> ();
 		gameObject.transform.position = RagePixelUtility.GetSceneViewCenter();
 		gameObject.GetComponent<SpriteRenderer>().sprite = RagePixelUtility.CreateNewSprite();
 		gameObject.GetComponent<SpriteRenderer>().sharedMaterial = RagePixelResources.defaultMaterial;

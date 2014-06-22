@@ -279,6 +279,11 @@ public static class RagePixelUtility
 		textureImporter.npotScale = TextureImporterNPOTScale.None;
 		textureImporter.filterMode = FilterMode.Point;
 		textureImporter.isReadable = true;
+
+		TextureImporterSettings settings = new TextureImporterSettings();
+		textureImporter.ReadTextureSettings (settings);
+		settings.spriteMeshType = SpriteMeshType.FullRect;
+		textureImporter.SetTextureSettings (settings);
 	}
 
 	private static Texture2D CreateDefaultSpriteTexture ()
