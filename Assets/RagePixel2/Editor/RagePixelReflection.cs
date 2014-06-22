@@ -38,12 +38,11 @@ public class RagePixelReflection
 		return assembly.GetType("UnityEditor." + typeName);
 	}
 
-	public static object InvokeEditorStatic (string typeName, string methodName, object[] paramValues)
+	public static object InvokeEditorStatic (string typeName, string methodName, object[] paramValues, Type[] types)
 	{
-		Assembly assembly = Assembly.GetAssembly(typeof(EditorUtility));
-		System.Type type = assembly.GetType(typeName);
-		MethodInfo methodInfo = type.GetMethod(methodName);
-		return methodInfo.Invoke(methodName, paramValues);
+		System.Type type = GetEditorType(typeName);
+		MethodInfo methodInfo = type.GetMethod (methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, null, types, null);
+		return methodInfo.Invoke (methodName, paramValues);
 	}
 
 	public static object Invoke (object instance, string methodName, object[] paramValues)

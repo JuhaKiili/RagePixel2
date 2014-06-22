@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using Assets.RagePixel2.Editor;
@@ -5,63 +6,45 @@ using UnityEditor;
 using UnityEditor.Graphs;
 using UnityEngine;
 using System.Collections;
+using Object = UnityEngine.Object;
 
-[CustomEditor (typeof (RagePixelSprite))]
-public class RagePixelSpriteEditor : Editor
+public class RagePixelEditorWindow : EditorWindow
 {
 	private const float k_SceneButtonSize = 32f;
 
-	public RagePixelSprite ragePixelSprite 
+	public Object target
 	{
-		get { return (target as RagePixelSprite); }
+		get { return Selection.activeObject; }
+	}
+
+	public GameObject gameObject
+	{
+		get { return (target as GameObject); }
 	}
 
 	public Transform transform
 	{
-		get { return ragePixelSprite.transform; }
+		get {  return (target as GameObject) != null ? (target as GameObject).transform : null; }
 	}
 
 	public SpriteRenderer spriteRenderer
 	{
-		get { return ragePixelSprite.GetComponent<SpriteRenderer> (); }
+		get { return (target as GameObject) != null ? (target as GameObject).GetComponent<SpriteRenderer>() : null; }
 	}
 
 	public Sprite sprite
 	{
-		get { return spriteRenderer.sprite; }
+		get { return spriteRenderer != null ? spriteRenderer.sprite : null; }
 	}
 
-	public Color paintColor
+	private bool editingEnabled
 	{
-		get { return paintColorPickerGUI.selectedColor; }
+		get { return sprite != null && (PrefabUtility.GetPrefabType(target) == PrefabType.None || PrefabUtility.GetPrefabType(target) == PrefabType.PrefabInstance); }
 	}
 
-	public EditorWindow colorPickerWindow
-	{
-		get { return RagePixelReflection.GetEditorStatic ("ColorPicker", "get") as EditorWindow; }
-	}
-
-	private RagePixelColorPickerGUI m_PaintColorPickerGUI;
-	public RagePixelColorPickerGUI paintColorPickerGUI
-	{
-		get
-		{
-			if (m_PaintColorPickerGUI == null)
-			{
-				m_PaintColorPickerGUI = new RagePixelColorPickerGUI();
-				m_PaintColorPickerGUI.gizmoVisible = false;
-				m_PaintColorPickerGUI.visible = false;
-				m_PaintColorPickerGUI.gizmoPositionX = 5;
-				m_PaintColorPickerGUI.gizmoPositionY = 5;
-				m_PaintColorPickerGUI.positionX = m_PaintColorPickerGUI.gizmoPositionX + m_PaintColorPickerGUI.gizmoPixelWidth;
-				m_PaintColorPickerGUI.positionY = m_PaintColorPickerGUI.gizmoPositionY;
-			}
-			return m_PaintColorPickerGUI;
-		}
-	}
-
+	private Color m_PaintColor = Color.green;
 	private bool m_MouseIsDown;
-	private Vector2 m_LastMousePixel;
+	private Vector2? m_LastMousePixel = null;
 	private Tool m_PreviousTool;
 	
 	public enum SceneMode { Default=0, Paint }
@@ -93,49 +76,36 @@ public class RagePixelSpriteEditor : Editor
 		}
 	}
 
+	[MenuItem ("Window/RagePixel")]
+	static void Init ()
+	{
+		GetWindow(typeof(RagePixelEditorWindow));
+	}
+	
 	[MenuItem("GameObject/Create Other/RagePixel Sprite")]
 	public static void CreateSpriteMenuItem()
 	{
 		GameObject gameObject = new GameObject();
 		gameObject.name = "New Sprite";
 		gameObject.transform.position = RagePixelUtility.GetSceneViewCenter();
-		gameObject.AddComponent<RagePixelSprite>();
 		gameObject.GetComponent<SpriteRenderer>().sprite = RagePixelUtility.CreateNewSprite();
 		gameObject.GetComponent<SpriteRenderer>().sharedMaterial = RagePixelResources.defaultMaterial;
 		Selection.activeGameObject = gameObject;
-		SceneView.FrameLastActiveSceneView ();
+		SceneView.FrameLastActiveSceneView();
 	}
 	
-	public override void OnInspectorGUI ()
+	public void OnGUI () 
 	{
-
+		GUILayout.BeginHorizontal();
+		ArrowOnGUI();
+		EditorGUI.BeginDisabledGroup(!editingEnabled);
+		PaintColorOnGUI();
+		PencilOnGUI();
+		EditorGUI.EndDisabledGroup();
+		GUILayout.EndHorizontal();
 	}
 
-	public void OnSceneGUI ()
-	{
-		Handles.BeginGUI();
-		SceneViewToolbarOnGUI();
-		Handles.EndGUI();
-		
-		HandlePainting ();
-	}
-
-	public void Update()
-	{
-		
-	}
-
-	public void OnEnable()
-	{
-		m_PreviousTool = Tools.current;
-	}
-
-	public void OnDisable ()
-	{
-		Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
-	}
-
-	private void HandlePainting ()
+	public void OnSceneGUI (SceneView sceneView)
 	{
 		if (sprite == null)
 			return;
@@ -148,6 +118,44 @@ public class RagePixelSpriteEditor : Editor
 				HandleModePaint();
 				break;
 		}
+	}
+
+	public void Update()
+	{
+		
+	}
+
+	public void OnEnable()
+	{
+		title = "RagePixel";
+		SceneView.onSceneGUIDelegate += OnSceneGUI;
+		EditorApplication.playmodeStateChanged += OnPlayModeChanged;
+		m_PreviousTool = Tools.current;
+	}
+
+	public void OnDisable ()
+	{
+		SceneView.onSceneGUIDelegate -= OnSceneGUI;
+		EditorApplication.playmodeStateChanged -= OnPlayModeChanged;
+		ResetMode ();
+	}
+
+	public void OnSelectionChange ()
+	{
+		Repaint();
+	}
+
+	private void ResetMode ()
+	{
+		m_Mode = SceneMode.Default;
+		Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
+		Repaint();
+	}
+
+	private void OnPlayModeChanged ()
+	{
+		if (EditorApplication.isPlayingOrWillChangePlaymode)
+			ResetMode();
 	}
 
 	private void HandleModePaint ()
@@ -164,16 +172,18 @@ public class RagePixelSpriteEditor : Editor
 				if (Event.current.button == 0)
 					GUIUtility.hotControl = id;
 				else
-					m_PaintColorPickerGUI.selectedColor = sprite.texture.GetPixel ((int) p.x, (int) p.y);
+					m_PaintColor = sprite.texture.GetPixel((int)p.x, (int)p.y);
 
 				m_LastMousePixel = p;
 				Event.current.Use ();
+				Repaint();
 				break;
 			case (EventType.MouseDrag):
 				if (Event.current.button == 0)
 				{
 					Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-					RagePixelUtility.DrawPixelLine(sprite.texture, paintColor, (int)m_LastMousePixel.x, (int)m_LastMousePixel.y, (int)pixel.x, (int)pixel.y);
+					if (m_LastMousePixel != null)
+						RagePixelUtility.DrawPixelLine(sprite.texture, m_PaintColor, (int)m_LastMousePixel.Value.x, (int)m_LastMousePixel.Value.y, (int)pixel.x, (int)pixel.y);
 					m_LastMousePixel = pixel;
 				}
 				break;
@@ -182,6 +192,7 @@ public class RagePixelSpriteEditor : Editor
 				break;
 			case (EventType.MouseUp):
 				m_MouseIsDown = false;
+				m_LastMousePixel = null;
 				if (Event.current.button == 0)
 					RagePixelUtility.SaveImageData(sprite);
 				GUIUtility.hotControl = 0;
@@ -193,34 +204,29 @@ public class RagePixelSpriteEditor : Editor
 		}
 	}
 
-	private void SceneViewToolbarOnGUI ()
+	public void PaintColorOnGUI ()
 	{
-		GUILayout.BeginArea(new Rect(2, 2, 500, 200));
-		GUILayout.BeginHorizontal();
-		ColorPickerOnGUI ();
-		GUILayout.EndHorizontal();
-		GUILayout.EndArea();
+		// internal static Color ColorField (Rect position, GUIContent label, Color value, bool showEyedropper, bool showAlpha)
+		object[] parameters = new object[5];
+		parameters[0] = EditorGUILayout.GetControlRect(false, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
+		parameters[1] = new GUIContent ("");
+		parameters[2] = m_PaintColor;
+		parameters[3] = false;
+		parameters[4] = true;
 
-		GUILayout.FlexibleSpace();
-		GUILayout.BeginVertical();
-		ArrowOnGUI();
-		PencilOnGUI();
-		GUILayout.EndVertical();
-		GUILayout.FlexibleSpace();
-	}
+		Type[] types = new Type[5];
+		types[0] = typeof (Rect);
+		types[1] = typeof (GUIContent);
+		types[2] = typeof (Color);
+		types[3] = typeof (bool);
+		types[4] = typeof (bool);
+		
+		//Debug.Log(RagePixelReflection.GetEditorType("EditorGUI"));
+		object returnValue = RagePixelReflection.InvokeEditorStatic("EditorGUI", "ColorField", parameters, types);
+		m_PaintColor = (Color)returnValue;
 
-	public void ColorPickerOnGUI ()
-	{
-		if (GUILayout.Button(paintColorPickerGUI.colorGizmoTexture, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize)))
-			paintColorPickerGUI.visible = !paintColorPickerGUI.visible;
-
-		if (paintColorPickerGUI.visible)
-		{
-			if (paintColorPickerGUI.HandleGUIEvent (Event.current))
-				Event.current.Use ();
-			
-			GUI.DrawTexture(paintColorPickerGUI.bounds, paintColorPickerGUI.colorPickerTexture);
-		}
+		//const float k_ColorPipetteIconWidth = 20f;
+		//m_PaintColor = EditorGUILayout.ColorField (m_PaintColor, GUILayout.Width (k_SceneButtonSize + k_ColorPipetteIconWidth));
 	}
 
 	public void ArrowOnGUI ()
