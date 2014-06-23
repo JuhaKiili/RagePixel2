@@ -288,6 +288,18 @@ public static class RagePixelUtility
 
 	private static Texture2D CreateDefaultSpriteTexture ()
 	{
-		return new Texture2D (32, 32);
+		Texture2D t = new Texture2D (32, 32);
+		Color32[] colors = new Color32[32*32];
+
+		for (int i = 1; i < colors.Length-1; i++)
+			colors[i] = new Color32 (128, 128, 128, 255);
+
+		colors[0] = new Color32(128, 128, 128, 0);
+		colors[31] = new Color32(128, 128, 128, 0);
+		colors[colors.Length - 32] = new Color32(128, 128, 128, 0);
+		colors[colors.Length - 1] = new Color32(128, 128, 128, 0);
+
+		t.SetPixels32(colors);
+		return t;
 	}
 }
