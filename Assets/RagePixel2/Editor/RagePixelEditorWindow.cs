@@ -47,7 +47,7 @@ public class RagePixelEditorWindow : EditorWindow
 	private Vector2? m_LastMousePixel = null;
 	private Tool m_PreviousTool;
 	
-	public enum SceneMode { Default=0, Paint }
+	public enum SceneMode { Default=0, Paint, FloodFill }
 	private SceneMode m_Mode;
 	public SceneMode mode
 	{
@@ -102,6 +102,7 @@ public class RagePixelEditorWindow : EditorWindow
 		EditorGUI.BeginDisabledGroup(!editingEnabled);
 		PaintColorOnGUI();
 		PencilOnGUI();
+		FloodFillOnGUI();
 		EditorGUI.EndDisabledGroup();
 		GUILayout.EndHorizontal();
 	}
@@ -117,6 +118,9 @@ public class RagePixelEditorWindow : EditorWindow
 				break;
 			case SceneMode.Paint:
 				HandleModePaint();
+				break;
+			case SceneMode.FloodFill:
+				HandleModeFloodFill();
 				break;
 		}
 	}
@@ -186,6 +190,42 @@ public class RagePixelEditorWindow : EditorWindow
 		}
 	}
 
+	private void HandleModeFloodFill ()
+	{
+		int id = GUIUtility.GetControlID("Floodfill".GetHashCode(), FocusType.Passive);
+		EditorGUIUtility.AddCursorRect(new Rect(0, 0, 10000, 10000), MouseCursor.ArrowPlus);
+
+		switch (Event.current.type)
+		{
+			case (EventType.MouseDown):
+				if (Event.current.button == 0)
+				{
+					GUIUtility.hotControl = id;
+					Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
+					Color oldColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
+					Texture2D texture = sprite.texture;
+					RagePixelUtility.FloodFill (oldColor, m_PaintColor, texture, (int) pixel.x, (int) pixel.y, 0, 0, texture.width,
+						texture.height);
+					texture.Apply ();
+				}
+				break;
+			case (EventType.MouseMove):
+				SceneView.RepaintAll();
+				break;
+			case (EventType.Repaint):
+				DrawPaintGizmo();
+				break;
+			case (EventType.MouseUp):
+				if (Event.current.button == 0)
+				{
+					RagePixelUtility.SaveImageData (sprite);
+					Event.current.Use ();
+					GUIUtility.hotControl = 0;
+				}
+				break;
+		}
+	}
+
 	private void HandleModePaintOnMouseUp ()
 	{
 		m_MouseIsDown = false;
@@ -232,18 +272,25 @@ public class RagePixelEditorWindow : EditorWindow
 
 	public void ArrowOnGUI ()
 	{
-		EditorGUI.BeginChangeCheck();
-		GUILayout.Toggle(mode == SceneMode.Default, RagePixelResources.arrow, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
-		if (EditorGUI.EndChangeCheck() && mode != SceneMode.Default)
-			mode = SceneMode.Default;
+		BasicModeButton (SceneMode.Default, RagePixelResources.arrow);
 	}
 
 	public void PencilOnGUI ()
 	{
+		BasicModeButton (SceneMode.Paint, RagePixelResources.pencil);
+	}
+
+	public void FloodFillOnGUI()
+	{
+		BasicModeButton (SceneMode.FloodFill, RagePixelResources.floodfill);
+	}
+
+	private void BasicModeButton (SceneMode buttonMode, Texture2D icon)
+	{
 		EditorGUI.BeginChangeCheck();
-		GUILayout.Toggle(mode == SceneMode.Paint, RagePixelResources.pencil, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
-		if (EditorGUI.EndChangeCheck() && mode != SceneMode.Paint)
-			mode = SceneMode.Paint;
+		GUILayout.Toggle(mode == buttonMode, icon, GUI.skin.button, GUILayout.Width(k_SceneButtonSize), GUILayout.Height(k_SceneButtonSize));
+		if (EditorGUI.EndChangeCheck() && mode != buttonMode)
+			mode = buttonMode;
 	}
 
 	private void DrawPaintGizmo ()
