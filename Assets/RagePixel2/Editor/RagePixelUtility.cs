@@ -108,9 +108,9 @@ public static class RagePixelUtility
 	}
 
 
-	public static void DrawPaintGizmo(Color color, Color shadowColor, Transform transform, Sprite sprite)
+	public static void DrawPaintGizmo(Vector2 screenPosition, Color color, Color shadowColor, Transform transform, Sprite sprite)
 	{
-		Vector2 pixel = ScreenToPixel(Event.current.mousePosition, transform, sprite);
+		Vector2 pixel = ScreenToPixel(screenPosition, transform, sprite);
 
 		Vector3[] screenPolyLine = new Vector3[5];
 		screenPolyLine[0] = PixelToScreen(new Vector2(Mathf.FloorToInt(pixel.x), Mathf.FloorToInt(pixel.y)), transform, sprite);
@@ -301,46 +301,5 @@ public static class RagePixelUtility
 
 		t.SetPixels32(colors);
 		return t;
-	}
-
-	public static void FloodFill(Color oldColor, Color color, Texture2D tex, int fX, int fY, int minX, int minY, int maxX, int maxY)
-	{
-		if (SameColor(oldColor, color)) //just in case.
-			return;
-
-		int width = maxX - minX;
-		int height = maxY - minY;
-
-		Color[] colors = tex.GetPixels(minX, minY, width, height); //store the colors into a temporary buffer
-		Stack<RagePixelTexel> stack = new Stack<RagePixelTexel>(); //non-recursive stack
-		stack.Push(new RagePixelTexel(fX, fY)); //original target
-		while (stack.Count > 0)
-		{
-			RagePixelTexel n = stack.Pop();
-			int index = (n.Y - minY) * width + (n.X - minX); //index into temporary buffer
-			bool pixelIsInTheSprite = n.X >= minX && n.X < maxX && n.Y >= minY && n.Y < maxY;
-			
-			if (pixelIsInTheSprite)
-			{
-				bool colorMatches = SameColor(colors[index], oldColor);
-				if (colorMatches)
-				{
-					colors[index] = color;
-					stack.Push (n + new RagePixelTexel (-1, 0)); //
-					stack.Push (n + new RagePixelTexel (1, 0)); // add to stack in all 4 directions
-					stack.Push (n + new RagePixelTexel (0, 1)); //
-					stack.Push (n + new RagePixelTexel (0, -1)); //
-				}
-			}
-		}
-
-		tex.SetPixels(minX, minY, width, height, colors); //put the temporary buffer back into the texture
-	}
-
-	private static bool SameColor(Color a, Color b)
-	{
-		const float epsilon = 0.01f;
-		return Mathf.Abs(a.r - b.r) < epsilon && Mathf.Abs(a.g - b.g) < epsilon && Mathf.Abs(a.b - b.b) < epsilon &&
-			   Mathf.Abs(a.a - b.a) < epsilon;
 	}
 }

@@ -11,8 +11,9 @@ using Object = UnityEngine.Object;
 public class RagePixelEditorWindow : EditorWindow
 {
 	private const float k_SceneButtonSize = 32f;
-
-	public Object target
+	public enum SceneMode { Default = 0, Paint, FloodFill }
+	
+	public Object target 
 	{
 		get { return Selection.activeObject; }
 	}
@@ -24,7 +25,7 @@ public class RagePixelEditorWindow : EditorWindow
 
 	public Transform transform
 	{
-		get {  return (target as GameObject) != null ? (target as GameObject).transform : null; }
+		get { return (target as GameObject) != null ? (target as GameObject).transform : null; }
 	}
 
 	public SpriteRenderer spriteRenderer
@@ -37,18 +38,12 @@ public class RagePixelEditorWindow : EditorWindow
 		get { return spriteRenderer != null ? spriteRenderer.sprite : null; }
 	}
 
-	private bool editingEnabled
+	public Color paintColor
 	{
-		get { return sprite != null && (PrefabUtility.GetPrefabType(target) == PrefabType.None || PrefabUtility.GetPrefabType(target) == PrefabType.PrefabInstance); }
+		get { return m_PaintColor; }
+		set { m_PaintColor = value; }
 	}
 
-	private Color m_PaintColor = Color.green;
-	private bool m_MouseIsDown;
-	private Vector2? m_LastMousePixel = null;
-	private Tool m_PreviousTool;
-	
-	public enum SceneMode { Default=0, Paint, FloodFill }
-	private SceneMode m_Mode;
 	public SceneMode mode
 	{
 		get { return m_Mode; }
@@ -56,45 +51,46 @@ public class RagePixelEditorWindow : EditorWindow
 		{
 			if (m_Mode != value)
 			{
-				OnModeChange (m_Mode, value);
+				OnModeChange(m_Mode, value);
 				m_Mode = value;
 			}
 		}
 	}
 
-	private void OnModeChange (SceneMode oldMode, SceneMode newMode)
+	private bool editingEnabled
 	{
-		if (newMode != SceneMode.Default)
-		{
-			if (oldMode == SceneMode.Default)
-				m_PreviousTool = Tools.current;
-			Tools.current = Tool.None;
-		}
-		else
-		{
-			Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
+		get { return sprite != null && (PrefabUtility.GetPrefabType(target) == PrefabType.None || PrefabUtility.GetPrefabType(target) == PrefabType.PrefabInstance); }
+	}
+
+	// Modes
+
+	private IRagePixelMode m_PaintHandler;
+	public IRagePixelMode paintHandler
+	{
+		get 
+		{ 
+			if (m_PaintHandler == null) 
+				m_PaintHandler = new RagePixelPaint();
+			return m_PaintHandler;
 		}
 	}
 
-	[MenuItem ("Window/RagePixel")]
-	static void Init ()
+	private IRagePixelMode m_FloodFillHandler;
+	public IRagePixelMode floodFillHandler
 	{
-		GetWindow(typeof(RagePixelEditorWindow));
+		get
+		{
+			if (m_FloodFillHandler == null)
+				m_FloodFillHandler = new RagePixelFloodFill();
+			return m_FloodFillHandler;
+		}
 	}
-	
-	[MenuItem("GameObject/Create Other/RagePixel Sprite")]
-	public static void CreateSpriteMenuItem()
-	{
-		GameObject gameObject = new GameObject();
-		gameObject.name = "New Sprite";
-		gameObject.AddComponent<SpriteRenderer> ();
-		gameObject.transform.position = RagePixelUtility.GetSceneViewCenter();
-		gameObject.GetComponent<SpriteRenderer>().sprite = RagePixelUtility.CreateNewSprite();
-		gameObject.GetComponent<SpriteRenderer>().sharedMaterial = RagePixelResources.defaultMaterial;
-		Selection.activeGameObject = gameObject;
-		SceneView.FrameLastActiveSceneView();
-	}
-	
+
+	private bool m_MouseIsDown;
+	private Color m_PaintColor = Color.green;
+	private Tool m_PreviousTool;
+	private SceneMode m_Mode;
+
 	public void OnGUI () 
 	{
 		GUILayout.BeginHorizontal();
@@ -107,27 +103,119 @@ public class RagePixelEditorWindow : EditorWindow
 		GUILayout.EndHorizontal();
 	}
 
+	public void PaintColorOnGUI()
+	{
+		m_PaintColor = RagePixelUtility.PaintColorField(m_PaintColor, k_SceneButtonSize, k_SceneButtonSize);
+	}
+
+	public void ArrowOnGUI()
+	{
+		BasicModeButton(SceneMode.Default, RagePixelResources.arrow);
+	}
+
+	public void PencilOnGUI()
+	{
+		BasicModeButton(SceneMode.Paint, RagePixelResources.pencil);
+	}
+
+	public void FloodFillOnGUI()
+	{
+		BasicModeButton(SceneMode.FloodFill, RagePixelResources.floodfill);
+	}
+
 	public void OnSceneGUI (SceneView sceneView)
 	{
 		if (sprite == null)
 			return;
+		
+		UpdateHotControl ();
+		UpdateCursor ();
+		UpdateMouseIsDown ();
+		
+		IRagePixelMode handler = GetModeHandler ();
+		
+		if (handler == null)
+			return;
+
+		if (handler.AllowRMBColorPick ())
+			HandleColorPicking ();
+
+		TriggerModeHandler (handler);
+	}
+
+	private void UpdateCursor ()
+	{
+		if (mode != SceneMode.Default)
+			EditorGUIUtility.AddCursorRect(new Rect(0, 0, 10000, 10000), MouseCursor.ArrowPlus);
+	}
+
+	private void UpdateMouseIsDown ()
+	{
+		if (Event.current.type == EventType.MouseDown)
+			m_MouseIsDown = true;
+		if (Event.current.type == EventType.MouseUp)
+			m_MouseIsDown = false;
+	}
+
+	private void UpdateHotControl ()
+	{
+		int id = GUIUtility.GetControlID ("RagePixel".GetHashCode (), FocusType.Passive);
+
+		if (Event.current.type == EventType.MouseDown)
+			GUIUtility.hotControl = id;
+		if (Event.current.type == EventType.MouseUp)
+			GUIUtility.hotControl = 0;
+	}
+
+	public void TriggerModeHandler(IRagePixelMode handler)
+	{
+		switch (Event.current.type)
+		{
+			case EventType.MouseDown:
+				handler.OnMouseDown(this);
+				break;
+			case EventType.MouseUp:
+				handler.OnMouseUp(this);
+				break;
+			case EventType.MouseMove:
+				handler.OnMouseMove(this);
+				break;
+			case EventType.MouseDrag:
+				handler.OnMouseDrag(this);
+				break;
+			case EventType.Repaint:
+				handler.OnRepaint(this);
+				break;
+		}
+	}
+
+	private IRagePixelMode GetModeHandler ()
+	{
+		IRagePixelMode handler = null;
 
 		switch (mode)
 		{
 			case SceneMode.Default:
 				break;
 			case SceneMode.Paint:
-				HandleModePaint();
+				handler = paintHandler;
 				break;
 			case SceneMode.FloodFill:
-				HandleModeFloodFill();
+				handler = floodFillHandler;
 				break;
 		}
+		return handler;
 	}
 
-	public void Update()
+	private void HandleColorPicking ()
 	{
-		
+		if (Event.current.type == EventType.MouseDown && Event.current.button > 0)
+		{
+			Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
+			paintColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
+			Event.current.Use();
+			Repaint();
+		}
 	}
 
 	public void OnEnable()
@@ -135,7 +223,9 @@ public class RagePixelEditorWindow : EditorWindow
 		title = "RagePixel";
 		SceneView.onSceneGUIDelegate += OnSceneGUI;
 		EditorApplication.playmodeStateChanged += OnPlayModeChanged;
-		m_PreviousTool = Tools.current;
+
+		m_PreviousTool = Tool.Move;
+		Tools.current = Tool.Move;
 	}
 
 	public void OnDisable ()
@@ -150,6 +240,23 @@ public class RagePixelEditorWindow : EditorWindow
 		Repaint();
 	}
 
+	public void DrawBasicPaintGizmo ()
+	{
+		Color color = m_MouseIsDown ? Color.white : new Color(1f, 1f, 1f, 0.4f);
+		Color shadowColor = m_MouseIsDown ? Color.black : new Color(0f, 0f, 0f, 0.4f);
+		RagePixelUtility.DrawPaintGizmo (Event.current.mousePosition, color, shadowColor, transform, sprite);
+	}
+
+	public Vector2 ScreenToPixel(Vector2 screenPosition)
+	{
+		return RagePixelUtility.ScreenToPixel(screenPosition, transform, sprite);
+	}
+
+	public Vector2 PixelToScreen(Vector2 pixelPosition)
+	{
+		return RagePixelUtility.PixelToScreen(pixelPosition, transform, sprite);
+	}
+
 	private void ResetMode ()
 	{
 		m_Mode = SceneMode.Default;
@@ -162,129 +269,7 @@ public class RagePixelEditorWindow : EditorWindow
 		if (EditorApplication.isPlayingOrWillChangePlaymode)
 			ResetMode();
 	}
-
-	private void HandleModePaint ()
-	{
-		int id = GUIUtility.GetControlID("Paint".GetHashCode(), FocusType.Passive);
-		EditorGUIUtility.AddCursorRect(new Rect(0, 0, 10000, 10000), MouseCursor.ArrowPlus);
 	
-		switch (Event.current.type)
-		{
-			case (EventType.MouseDown):
-				GUIUtility.hotControl = id;
-				HandleModePaintOnMouseDown ();
-				break;
-			case (EventType.MouseDrag):
-				HandleModePaintOnMouseDrag ();
-				break;
-			case (EventType.MouseMove):
-				SceneView.RepaintAll();
-				break;
-			case (EventType.MouseUp):
-				HandleModePaintOnMouseUp ();
-				GUIUtility.hotControl = 0;
-				break;
-			case (EventType.Repaint):
-				DrawPaintGizmo();
-				break;
-		}
-	}
-
-	private void HandleModeFloodFill ()
-	{
-		int id = GUIUtility.GetControlID("Floodfill".GetHashCode(), FocusType.Passive);
-		EditorGUIUtility.AddCursorRect(new Rect(0, 0, 10000, 10000), MouseCursor.ArrowPlus);
-
-		switch (Event.current.type)
-		{
-			case (EventType.MouseDown):
-				if (Event.current.button == 0)
-				{
-					GUIUtility.hotControl = id;
-					Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-					Color oldColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
-					Texture2D texture = sprite.texture;
-					RagePixelUtility.FloodFill (oldColor, m_PaintColor, texture, (int) pixel.x, (int) pixel.y, 0, 0, texture.width,
-						texture.height);
-					texture.Apply ();
-				}
-				break;
-			case (EventType.MouseMove):
-				SceneView.RepaintAll();
-				break;
-			case (EventType.Repaint):
-				DrawPaintGizmo();
-				break;
-			case (EventType.MouseUp):
-				if (Event.current.button == 0)
-				{
-					RagePixelUtility.SaveImageData (sprite);
-					Event.current.Use ();
-					GUIUtility.hotControl = 0;
-				}
-				break;
-		}
-	}
-
-	private void HandleModePaintOnMouseUp ()
-	{
-		m_MouseIsDown = false;
-		m_LastMousePixel = null;
-		if (Event.current.button == 0)
-			RagePixelUtility.SaveImageData (sprite);
-		Event.current.Use ();
-	}
-
-	private void HandleModePaintOnMouseDrag ()
-	{
-		if (Event.current.button != 0)
-			return;
-
-		Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-		if (m_LastMousePixel != null)
-			RagePixelUtility.DrawPixelLine (sprite.texture, m_PaintColor, (int) m_LastMousePixel.Value.x, (int) m_LastMousePixel.Value.y, (int) pixel.x, (int) pixel.y);
-		
-		m_LastMousePixel = pixel;
-	}
-
-	private void HandleModePaintOnMouseDown ()
-	{
-		m_MouseIsDown = true;
-		Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-
-		if (Event.current.button == 0)
-		{
-			sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, m_PaintColor);
-			sprite.texture.Apply ();
-		}
-		else
-			m_PaintColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
-
-		m_LastMousePixel = pixel;
-		Event.current.Use ();
-		Repaint ();
-	}
-
-	public void PaintColorOnGUI ()
-	{
-		m_PaintColor = RagePixelUtility.PaintColorField (m_PaintColor, k_SceneButtonSize, k_SceneButtonSize);
-	}
-
-	public void ArrowOnGUI ()
-	{
-		BasicModeButton (SceneMode.Default, RagePixelResources.arrow);
-	}
-
-	public void PencilOnGUI ()
-	{
-		BasicModeButton (SceneMode.Paint, RagePixelResources.pencil);
-	}
-
-	public void FloodFillOnGUI()
-	{
-		BasicModeButton (SceneMode.FloodFill, RagePixelResources.floodfill);
-	}
-
 	private void BasicModeButton (SceneMode buttonMode, Texture2D icon)
 	{
 		EditorGUI.BeginChangeCheck();
@@ -293,20 +278,36 @@ public class RagePixelEditorWindow : EditorWindow
 			mode = buttonMode;
 	}
 
-	private void DrawPaintGizmo ()
+	private void OnModeChange(SceneMode oldMode, SceneMode newMode)
 	{
-		Color color = m_MouseIsDown ? Color.white : new Color(1f, 1f, 1f, 0.4f);
-		Color shadowColor = m_MouseIsDown ? Color.black : new Color(0f, 0f, 0f, 0.4f);
-		RagePixelUtility.DrawPaintGizmo (color, shadowColor, transform, sprite);
+		if (newMode != SceneMode.Default)
+		{
+			if (oldMode == SceneMode.Default)
+				m_PreviousTool = Tools.current;
+			Tools.current = Tool.None;
+		}
+		else
+		{
+			Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
+		}
 	}
 
-	private Vector2 ScreenToPixel (Vector2 screenPosition)
+	[MenuItem("Window/RagePixel")]
+	static void Init()
 	{
-		return RagePixelUtility.ScreenToPixel(screenPosition, transform, sprite);
+		GetWindow(typeof(RagePixelEditorWindow));
 	}
 
-	private Vector2 PixelToScreen(Vector2 pixelPosition)
+	[MenuItem("GameObject/Create Other/RagePixel Sprite")]
+	public static void CreateSpriteMenuItem()
 	{
-		return RagePixelUtility.PixelToScreen(pixelPosition, transform, sprite);
+		GameObject gameObject = new GameObject();
+		gameObject.name = "New Sprite";
+		gameObject.AddComponent<SpriteRenderer>();
+		gameObject.transform.position = RagePixelUtility.GetSceneViewCenter();
+		gameObject.GetComponent<SpriteRenderer>().sprite = RagePixelUtility.CreateNewSprite();
+		gameObject.GetComponent<SpriteRenderer>().sharedMaterial = RagePixelResources.defaultMaterial;
+		Selection.activeGameObject = gameObject;
+		SceneView.FrameLastActiveSceneView();
 	}
 }
