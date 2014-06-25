@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 public class RagePixelEditorWindow : EditorWindow
 {
 	private const float k_SceneButtonSize = 32f;
-	public enum SceneMode { Default = 0, Paint, FloodFill }
+	public enum SceneMode { Default = 0, Paint, FloodFill, ReplaceColor }
 	
 	public Object target 
 	{
@@ -44,6 +44,16 @@ public class RagePixelEditorWindow : EditorWindow
 		set { m_PaintColor = value; }
 	}
 
+	public Color replaceTargetColor
+	{
+		get { return m_ReplaceTargetColor; }
+		set
+		{
+			replaceColorHandler.ReplaceColor (sprite, paintColor, value);
+			m_ReplaceTargetColor = value;
+		}
+	}
+
 	public SceneMode mode
 	{
 		get { return m_Mode; }
@@ -64,8 +74,8 @@ public class RagePixelEditorWindow : EditorWindow
 
 	// Modes
 
-	private IRagePixelMode m_PaintHandler;
-	public IRagePixelMode paintHandler
+	private RagePixelPaint m_PaintHandler;
+	public RagePixelPaint paintHandler
 	{
 		get 
 		{ 
@@ -75,8 +85,8 @@ public class RagePixelEditorWindow : EditorWindow
 		}
 	}
 
-	private IRagePixelMode m_FloodFillHandler;
-	public IRagePixelMode floodFillHandler
+	private RagePixelFloodFill m_FloodFillHandler;
+	public RagePixelFloodFill floodFillHandler
 	{
 		get
 		{
@@ -86,8 +96,20 @@ public class RagePixelEditorWindow : EditorWindow
 		}
 	}
 
+	private RagePixelReplaceColor m_ReplaceColorHandler;
+	public RagePixelReplaceColor replaceColorHandler
+	{
+		get
+		{
+			if (m_ReplaceColorHandler == null)
+				m_ReplaceColorHandler = new RagePixelReplaceColor();
+			return m_ReplaceColorHandler;
+		}
+	}
+
 	private bool m_MouseIsDown;
 	private Color m_PaintColor = Color.green;
+	private Color m_ReplaceTargetColor = Color.blue;
 	private Tool m_PreviousTool;
 	private SceneMode m_Mode;
 
@@ -97,15 +119,30 @@ public class RagePixelEditorWindow : EditorWindow
 		ArrowOnGUI();
 		EditorGUI.BeginDisabledGroup(!editingEnabled);
 		PaintColorOnGUI();
+		GUILayout.EndHorizontal();
+		GUILayout.Space (2);
+		GUILayout.BeginHorizontal();
 		PencilOnGUI();
 		FloodFillOnGUI();
-		EditorGUI.EndDisabledGroup();
 		GUILayout.EndHorizontal();
+		EditorGUI.EndDisabledGroup();
+		
 	}
 
 	public void PaintColorOnGUI()
 	{
 		m_PaintColor = RagePixelUtility.PaintColorField(m_PaintColor, k_SceneButtonSize, k_SceneButtonSize);
+		BasicModeButton(SceneMode.ReplaceColor, RagePixelResources.arrowRight);
+		if (mode == SceneMode.ReplaceColor)
+		{
+			replaceTargetColor = RagePixelUtility.PaintColorField(replaceTargetColor, k_SceneButtonSize, k_SceneButtonSize);
+			if (GUILayout.Button ("OK", GUILayout.Width (k_SceneButtonSize), GUILayout.Height ((k_SceneButtonSize))))
+			{
+				replaceColorHandler.Apply (sprite);
+				paintColor = replaceTargetColor;
+				mode = SceneMode.Paint;
+			}
+		}
 	}
 
 	public void ArrowOnGUI()
@@ -203,6 +240,9 @@ public class RagePixelEditorWindow : EditorWindow
 			case SceneMode.FloodFill:
 				handler = floodFillHandler;
 				break;
+			case SceneMode.ReplaceColor:
+				handler = replaceColorHandler;
+				break;
 		}
 		return handler;
 	}
@@ -212,7 +252,13 @@ public class RagePixelEditorWindow : EditorWindow
 		if (Event.current.type == EventType.MouseDown && Event.current.button > 0)
 		{
 			Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-			paintColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
+			Color newColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
+
+			if (mode == SceneMode.ReplaceColor)
+				replaceTargetColor = newColor;
+			else
+				paintColor = newColor;
+			
 			Event.current.Use();
 			Repaint();
 		}
@@ -280,6 +326,27 @@ public class RagePixelEditorWindow : EditorWindow
 
 	private void OnModeChange(SceneMode oldMode, SceneMode newMode)
 	{
+		PreserveToolsCurrent (oldMode, newMode);
+
+		if (newMode == SceneMode.ReplaceColor)
+			OnEnterColorReplacerMode ();
+		if (oldMode == SceneMode.ReplaceColor)
+			OnExitColorReplacerMode ();
+	}
+
+	private void OnExitColorReplacerMode ()
+	{
+		replaceColorHandler.Cancel (sprite, paintColor);
+	}
+
+	private void OnEnterColorReplacerMode ()
+	{
+		replaceColorHandler.SaveSnapshot (sprite);
+		replaceTargetColor = paintColor;
+	}
+
+	private void PreserveToolsCurrent (SceneMode oldMode, SceneMode newMode)
+	{
 		if (newMode != SceneMode.Default)
 		{
 			if (oldMode == SceneMode.Default)
@@ -287,9 +354,7 @@ public class RagePixelEditorWindow : EditorWindow
 			Tools.current = Tool.None;
 		}
 		else
-		{
 			Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
-		}
 	}
 
 	[MenuItem("Window/RagePixel")]

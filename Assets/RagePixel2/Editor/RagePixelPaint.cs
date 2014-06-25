@@ -5,7 +5,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-class RagePixelPaint : IRagePixelMode
+public class RagePixelPaint : IRagePixelMode
 {
 	private Vector2? m_LastMousePixel;
 

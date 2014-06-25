@@ -246,7 +246,14 @@ public static class RagePixelUtility
 		File.WriteAllBytes (path, texture.EncodeToPNG());
 		//AssetDatabase.ImportAsset(path);
 	}
-	
+
+	public static bool SameColor(Color a, Color b)
+	{
+		const float epsilon = 0.01f;
+		return Mathf.Abs(a.r - b.r) < epsilon && Mathf.Abs(a.g - b.g) < epsilon && Mathf.Abs(a.b - b.b) < epsilon &&
+			   Mathf.Abs(a.a - b.a) < epsilon;
+	}
+
 	private static Sprite CreateNewSprite (string path)
 	{
 		Texture2D newTexture = CreateDefaultSpriteTexture();

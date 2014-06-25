@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 
 
-class RagePixelFloodFill : IRagePixelMode
+public class RagePixelFloodFill : IRagePixelMode
 {
 	public void OnMouseDown (RagePixelEditorWindow owner)
 	{
@@ -15,7 +15,8 @@ class RagePixelFloodFill : IRagePixelMode
 			Vector2 pixel = owner.ScreenToPixel(Event.current.mousePosition);
 			Color oldColor = owner.sprite.texture.GetPixel((int)pixel.x, (int)pixel.y);
 			Texture2D texture = owner.sprite.texture;
-			FloodFill (oldColor, owner.paintColor, texture, (int)pixel.x, (int)pixel.y, 0, 0, texture.width, texture.height);
+			Rect spriteRect = owner.sprite.textureRect;
+			FloodFill(oldColor, owner.paintColor, texture, (int)pixel.x, (int)pixel.y, (int)spriteRect.xMin, (int)spriteRect.yMin, (int)spriteRect.xMax, (int)spriteRect.yMax);
 			texture.Apply();
 			Event.current.Use();
 		}
@@ -52,7 +53,7 @@ class RagePixelFloodFill : IRagePixelMode
 
 	private static void FloodFill(Color oldColor, Color color, Texture2D tex, int fX, int fY, int minX, int minY, int maxX, int maxY)
 	{
-		if (SameColor(oldColor, color)) //just in case.
+		if (RagePixelUtility.SameColor(oldColor, color)) //just in case.
 			return;
 
 		int width = maxX - minX;
@@ -69,7 +70,7 @@ class RagePixelFloodFill : IRagePixelMode
 
 			if (pixelIsInTheSprite)
 			{
-				bool colorMatches = SameColor(colors[index], oldColor);
+				bool colorMatches = RagePixelUtility.SameColor(colors[index], oldColor);
 				if (colorMatches)
 				{
 					colors[index] = color;
@@ -82,13 +83,6 @@ class RagePixelFloodFill : IRagePixelMode
 		}
 
 		tex.SetPixels(minX, minY, width, height, colors); //put the temporary buffer back into the texture
-	}
-
-	private static bool SameColor(Color a, Color b)
-	{
-		const float epsilon = 0.01f;
-		return Mathf.Abs(a.r - b.r) < epsilon && Mathf.Abs(a.g - b.g) < epsilon && Mathf.Abs(a.b - b.b) < epsilon &&
-			   Mathf.Abs(a.a - b.a) < epsilon;
 	}
 }
 
