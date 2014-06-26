@@ -165,8 +165,6 @@ public class RagePixelEditorWindow : EditorWindow
 		if (sprite == null)
 			return;
 		
-		UpdateHotControl ();
-		UpdateCursor ();
 		UpdateMouseIsDown ();
 		
 		IRagePixelMode handler = GetModeHandler ();
@@ -174,6 +172,9 @@ public class RagePixelEditorWindow : EditorWindow
 		if (handler == null)
 			return;
 
+		UpdateHotControl();
+		UpdateCursor();
+		
 		if (handler.AllowRMBColorPick ())
 			HandleColorPicking ();
 
