@@ -354,7 +354,10 @@ public class RagePixelEditorWindow : EditorWindow
 			Tools.current = Tool.None;
 		}
 		else
-			Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
+		{
+			if (Tools.current == Tool.None)
+				Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
+		}
 	}
 
 	[MenuItem("Window/RagePixel")]
