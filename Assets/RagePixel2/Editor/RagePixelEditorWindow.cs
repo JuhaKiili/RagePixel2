@@ -165,11 +165,13 @@ public class RagePixelEditorWindow : EditorWindow
 		if (sprite == null)
 			return;
 		
+		UpdateMouseIsDown ();
+		
 		IRagePixelMode handler = GetModeHandler ();
+		
 		if (handler == null)
 			return;
 
-		UpdateMouseIsDown();
 		UpdateHotControl();
 		UpdateCursor();
 		
