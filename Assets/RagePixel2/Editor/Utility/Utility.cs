@@ -109,8 +109,7 @@ namespace RagePixel2
 		}
 
 
-		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Transform transform,
-			Sprite sprite)
+		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Color fillColor, Transform transform, Sprite sprite)
 		{
 			Vector2 pixel = ScreenToPixel (screenPosition, transform, sprite);
 
@@ -130,10 +129,20 @@ namespace RagePixel2
 				shadowPolyLine[i] = screenPolyLine[i] + new Vector3 (1f, 1f, 0f);
 
 			Handles.BeginGUI ();
+
+			GL.Begin(GL.QUADS);
+			for (int i = 0; i < screenPolyLine.Length - 1; i++)
+			{
+				GL.Color(fillColor);
+				GL.Vertex3(screenPolyLine[i].x, screenPolyLine[i].y, screenPolyLine[i].z);
+			}
+			GL.End();
+
 			Handles.color = shadowColor;
 			Handles.DrawPolyLine (shadowPolyLine);
 			Handles.color = color;
 			Handles.DrawPolyLine (screenPolyLine);
+			
 			Handles.EndGUI ();
 		}
 
