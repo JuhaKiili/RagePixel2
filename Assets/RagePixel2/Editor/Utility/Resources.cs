@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-namespace Assets.RagePixel2.Editor
+namespace RagePixel2
 {
-	class RagePixelResources
+	class Resources
 	{
 		private const string s_ArrowBase64 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAW0lEQVQ4Ea3RMQoAIAxDURXvf2W1W4dfm6KZVMIjYGu/s04q5qByBUHAUBUJARW5AgqSAhkiATdEBiKkBBAy7ZHST/xX2p16uCAqE4CqL2YrcIEHns9+wTNGwAY88i/6p8M2mgAAAABJRU5ErkJggg==";
 		private const string s_PencilBase64 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAeElEQVQ4Ee1TWw6AMAibxvtunmSPC2OayFaiM/hpIj+jQDcKWQgOk9NqreIotyUgsdmsAzH5dQf/62N8jlnbkkEV+djkIYR3b4Xdo43Dqre1xuFHf51lY4zLLMdx04EmQN5T6j8vl9IxfK27nFgfZICsF7APAseBD1Qpy22Hqw6tAAAAAElFTkSuQmCC";
@@ -133,3 +129,4 @@ namespace Assets.RagePixel2.Editor
 		}
 	}
 }
+
