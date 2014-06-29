@@ -261,18 +261,27 @@ namespace RagePixel2
 
 		private void HandleColorPicking ()
 		{
-			if (Event.current.type == EventType.MouseDown && Event.current.button > 0)
+			if (Event.current.button > 0)
 			{
-				Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-				Color newColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
+				switch (Event.current.type)
+				{
+					case EventType.MouseDown:
+						Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
+						Color newColor = sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
 
-				if (mode == SceneMode.ReplaceColor)
-					replaceTargetColor = newColor;
-				else
-					paintColor = newColor;
+						if (mode == SceneMode.ReplaceColor)
+							replaceTargetColor = newColor;
+						else
+							paintColor = newColor;
 
-				Event.current.Use ();
-				Repaint ();
+						Event.current.Use ();
+						Repaint ();
+						break;
+					case EventType.MouseUp:
+						Event.current.Use();
+						Repaint();
+						break;
+				}
 			}
 		}
 
