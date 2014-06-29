@@ -8,6 +8,11 @@ using UnityEngine;
 
 public class RagePixelFloodFill : IRagePixelMode
 {
+	public void OnSceneGUI (RagePixelEditorWindow owner)
+	{
+		return;
+	}
+
 	public void OnMouseDown (RagePixelEditorWindow owner)
 	{
 		if (Event.current.button == 0)

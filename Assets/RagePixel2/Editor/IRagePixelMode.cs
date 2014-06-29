@@ -6,6 +6,7 @@ using UnityEngine;
 
 public interface IRagePixelMode
 {
+	void OnSceneGUI (RagePixelEditorWindow owner);
 	void OnMouseDown (RagePixelEditorWindow owner);
 	void OnMouseUp (RagePixelEditorWindow owner);
 	void OnMouseDrag (RagePixelEditorWindow owner);

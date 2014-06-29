@@ -9,6 +9,11 @@ public class RagePixelReplaceColor : IRagePixelMode
 {
 	private Color[] m_Snapshot;
 
+	public void OnSceneGUI(RagePixelEditorWindow owner)
+	{
+		return;
+	}
+
 	public void OnMouseDown(RagePixelEditorWindow owner)
 	{
 		return;

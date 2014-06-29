@@ -176,7 +176,8 @@ public class RagePixelEditorWindow : EditorWindow
 		if (handler.AllowRMBColorPick ())
 			HandleColorPicking ();
 
-		TriggerModeHandler (handler);
+		handler.OnSceneGUI (this);
+		TriggerModeEventHandler (handler);
 	}
 
 	private void UpdateCursor ()
@@ -203,7 +204,7 @@ public class RagePixelEditorWindow : EditorWindow
 			GUIUtility.hotControl = 0;
 	}
 
-	public void TriggerModeHandler(IRagePixelMode handler)
+	public void TriggerModeEventHandler(IRagePixelMode handler)
 	{
 		switch (Event.current.type)
 		{

@@ -9,6 +9,11 @@ public class RagePixelPaint : IRagePixelMode
 {
 	private Vector2? m_LastMousePixel;
 
+	public void OnSceneGUI(RagePixelEditorWindow owner)
+	{
+		return;
+	}
+
 	public void OnMouseDown (RagePixelEditorWindow owner)
 	{
 		if (Event.current.button != 0)
