@@ -31,24 +31,31 @@ namespace RagePixel2
 			EditorGUI.BeginDisabledGroup (!m_State.editingEnabled);
 			PaintColorOnGUI ();
 			GUILayout.EndHorizontal ();
-			GUILayout.Space (2);
+			GUILayout.Space (k_VerticalSpaceBetweenButtons);
 			GUILayout.BeginHorizontal ();
 			PencilOnGUI ();
 			FloodFillOnGUI ();
+			GUILayout.EndHorizontal ();
+			GUILayout.Space (k_VerticalSpaceBetweenButtons);
+			GUILayout.BeginHorizontal ();
+			ResizeOnGUI ();
 			GUILayout.EndHorizontal ();
 			EditorGUI.EndDisabledGroup ();
 		}
 
 		public void PaintColorOnGUI ()
 		{
-			m_State.paintColor = Utility.PaintColorField (m_State.paintColor, k_SceneButtonSize, k_SceneButtonSize);
-			BasicModeButton (RagePixelState.SceneMode.ReplaceColor, Resources.arrowRight);
+			m_State.paintColor = Utility.PaintColorField (m_State.paintColor, k_ButtonSize, k_ButtonSize);
 			if (m_State.mode == RagePixelState.SceneMode.ReplaceColor)
 			{
-				m_State.replaceTargetColor = Utility.PaintColorField (m_State.replaceTargetColor, k_SceneButtonSize,
-					k_SceneButtonSize);
-				if (GUILayout.Button ("OK", GUILayout.Width (k_SceneButtonSize), GUILayout.Height ((k_SceneButtonSize))))
+				m_State.replaceTargetColor = Utility.PaintColorField (m_State.replaceTargetColor, k_ButtonSize,
+					k_ButtonSize);
+				if (GUILayout.Button ("OK", GUILayout.Width (k_ButtonSize), GUILayout.Height ((k_ButtonSize))))
 					m_State.ApplyColorReplace ();
+			}
+			else
+			{
+				BasicModeButton (RagePixelState.SceneMode.ReplaceColor, Resources.arrowRight);
 			}
 		}
 
@@ -67,6 +74,11 @@ namespace RagePixel2
 			BasicModeButton (RagePixelState.SceneMode.FloodFill, Resources.floodfill);
 		}
 
+		public void ResizeOnGUI ()
+		{
+			BasicModeButton (RagePixelState.SceneMode.Resize, Resources.resize);
+		}
+
 		public void OnSelectionChange ()
 		{
 			Repaint ();
@@ -75,7 +87,7 @@ namespace RagePixel2
 		private void BasicModeButton (RagePixelState.SceneMode buttonMode, Texture2D icon)
 		{
 			EditorGUI.BeginChangeCheck ();
-			GUILayout.Toggle (m_State.mode == buttonMode, icon, GUI.skin.button, GUILayout.Width (k_SceneButtonSize), GUILayout.Height (k_SceneButtonSize));
+			GUILayout.Toggle (m_State.mode == buttonMode, icon, GUI.skin.button, GUILayout.Width (k_ButtonSize), GUILayout.Height (k_ButtonSize));
 			if (EditorGUI.EndChangeCheck () && m_State.mode != buttonMode)
 				m_State.mode = buttonMode;
 		}
@@ -99,6 +111,7 @@ namespace RagePixel2
 			SceneView.FrameLastActiveSceneView ();
 		}
 
-		private const float k_SceneButtonSize = 32f;
+		private const float k_ButtonSize = 32f;
+		const float k_VerticalSpaceBetweenButtons = 2f;
 	}
 }

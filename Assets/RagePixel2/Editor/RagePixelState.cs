@@ -328,7 +328,8 @@ namespace RagePixel2
 			Default = 0,
 			Paint,
 			FloodFill,
-			ReplaceColor
+			ReplaceColor,
+			Resize
 		}
 	}
 }
