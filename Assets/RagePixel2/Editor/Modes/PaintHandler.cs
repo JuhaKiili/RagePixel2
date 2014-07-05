@@ -7,56 +7,56 @@ namespace RagePixel2
 	{
 		private Vector2? m_LastMousePixel;
 
-		public void OnSceneGUI (RagePixelEditorWindow owner)
+		public void OnSceneGUI (RagePixelState state)
 		{
 			return;
 		}
 
-		public void OnMouseDown (RagePixelEditorWindow owner)
+		public void OnMouseDown (RagePixelState state)
 		{
 			if (Event.current.button != 0)
 				return;
 
-			Vector2 pixel = owner.ScreenToPixel (Event.current.mousePosition);
-			owner.sprite.texture.SetPixel ((int) pixel.x, (int) pixel.y, owner.paintColor);
-			owner.sprite.texture.Apply ();
+			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition);
+			state.sprite.texture.SetPixel ((int)pixel.x, (int)pixel.y, state.paintColor);
+			state.sprite.texture.Apply ();
 			m_LastMousePixel = pixel;
-			owner.Repaint ();
+			state.Repaint ();
 			Event.current.Use ();
 		}
 
-		public void OnMouseUp (RagePixelEditorWindow owner)
+		public void OnMouseUp (RagePixelState state)
 		{
 			if (Event.current.button != 0)
 				return;
 
 			m_LastMousePixel = null;
-			Utility.SaveImageData (owner.sprite);
+			Utility.SaveImageData (state.sprite);
 			Event.current.Use ();
 		}
 
-		public void OnMouseDrag (RagePixelEditorWindow owner)
+		public void OnMouseDrag (RagePixelState state)
 		{
 			if (Event.current.button != 0)
 				return;
 
-			Vector2 pixel = owner.ScreenToPixel (Event.current.mousePosition);
+			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition);
 			if (m_LastMousePixel != null)
 			{
-				Utility.DrawPixelLine (owner.sprite.texture, owner.paintColor, (int) m_LastMousePixel.Value.x,
-					(int) m_LastMousePixel.Value.y, (int) pixel.x, (int) pixel.y);
+				Utility.DrawPixelLine (state.sprite.texture, state.paintColor, (int)m_LastMousePixel.Value.x,
+					(int)m_LastMousePixel.Value.y, (int)pixel.x, (int)pixel.y);
 			}
 			m_LastMousePixel = pixel;
 		}
 
-		public void OnMouseMove (RagePixelEditorWindow owner)
+		public void OnMouseMove (RagePixelState state)
 		{
 			SceneView.RepaintAll ();
 		}
 
-		public void OnRepaint (RagePixelEditorWindow owner)
+		public void OnRepaint (RagePixelState state)
 		{
-			owner.DrawBasicPaintGizmo ();
+			state.DrawBasicPaintGizmo ();
 		}
 
 		public bool AllowRMBColorPick ()

@@ -130,19 +130,19 @@ namespace RagePixel2
 
 			Handles.BeginGUI ();
 
-			GL.Begin(GL.QUADS);
+			GL.Begin (GL.QUADS);
 			for (int i = 0; i < screenPolyLine.Length - 1; i++)
 			{
-				GL.Color(fillColor);
-				GL.Vertex3(screenPolyLine[i].x, screenPolyLine[i].y, screenPolyLine[i].z);
+				GL.Color (fillColor);
+				GL.Vertex3 (screenPolyLine[i].x, screenPolyLine[i].y, screenPolyLine[i].z);
 			}
-			GL.End();
+			GL.End ();
 
 			Handles.color = shadowColor;
 			Handles.DrawPolyLine (shadowPolyLine);
 			Handles.color = color;
 			Handles.DrawPolyLine (screenPolyLine);
-			
+
 			Handles.EndGUI ();
 		}
 
@@ -158,7 +158,7 @@ namespace RagePixel2
 		public static void DrawPixelLine (Texture2D texture, Color color, int fromX, int fromY, int toX, int toY)
 		{
 			foreach (Vector2 pixel in GetPointsOnLine (fromX, fromY, toX, toY))
-				texture.SetPixel ((int) pixel.x, (int) pixel.y, color);
+				texture.SetPixel ((int)pixel.x, (int)pixel.y, color);
 			texture.Apply ();
 		}
 
@@ -180,7 +180,7 @@ namespace RagePixel2
 			types[4] = typeof (bool);
 
 			object returnValue = Reflection.InvokeEditorStatic ("EditorGUI", "ColorField", parameters, types);
-			return (Color) returnValue;
+			return (Color)returnValue;
 		}
 
 		// http://ericw.ca/notes/bresenhams-line-algorithm-in-csharp.html

@@ -6,48 +6,48 @@ namespace RagePixel2
 {
 	public class FloodFillHandler : IRagePixelMode
 	{
-		public void OnSceneGUI (RagePixelEditorWindow owner)
+		public void OnSceneGUI (RagePixelState state)
 		{
 			return;
 		}
 
-		public void OnMouseDown (RagePixelEditorWindow owner)
+		public void OnMouseDown (RagePixelState state)
 		{
 			if (Event.current.button == 0)
 			{
-				Vector2 pixel = owner.ScreenToPixel (Event.current.mousePosition);
-				Color oldColor = owner.sprite.texture.GetPixel ((int) pixel.x, (int) pixel.y);
-				Texture2D texture = owner.sprite.texture;
-				Rect spriteRect = owner.sprite.textureRect;
-				FloodFill (oldColor, owner.paintColor, texture, (int) pixel.x, (int) pixel.y, (int) spriteRect.xMin,
-					(int) spriteRect.yMin, (int) spriteRect.xMax, (int) spriteRect.yMax);
+				Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition);
+				Color oldColor = state.sprite.texture.GetPixel ((int)pixel.x, (int)pixel.y);
+				Texture2D texture = state.sprite.texture;
+				Rect spriteRect = state.sprite.textureRect;
+				FloodFill (oldColor, state.paintColor, texture, (int)pixel.x, (int)pixel.y, (int)spriteRect.xMin,
+					(int)spriteRect.yMin, (int)spriteRect.xMax, (int)spriteRect.yMax);
 				texture.Apply ();
 				Event.current.Use ();
 			}
 		}
 
-		public void OnMouseUp (RagePixelEditorWindow owner)
+		public void OnMouseUp (RagePixelState state)
 		{
 			if (Event.current.button == 0)
 			{
-				Utility.SaveImageData (owner.sprite);
+				Utility.SaveImageData (state.sprite);
 				Event.current.Use ();
 			}
 		}
 
-		public void OnMouseDrag (RagePixelEditorWindow owner)
+		public void OnMouseDrag (RagePixelState state)
 		{
 			return;
 		}
 
-		public void OnMouseMove (RagePixelEditorWindow owner)
+		public void OnMouseMove (RagePixelState state)
 		{
 			SceneView.RepaintAll ();
 		}
 
-		public void OnRepaint (RagePixelEditorWindow owner)
+		public void OnRepaint (RagePixelState state)
 		{
-			owner.DrawBasicPaintGizmo ();
+			state.DrawBasicPaintGizmo ();
 		}
 
 		public bool AllowRMBColorPick ()

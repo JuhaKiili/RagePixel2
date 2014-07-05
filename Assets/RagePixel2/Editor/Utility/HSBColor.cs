@@ -46,9 +46,7 @@ namespace RagePixel2
 			float max = Mathf.Max (r, Mathf.Max (g, b));
 
 			if (max <= 0)
-			{
 				return ret;
-			}
 
 			float min = Mathf.Min (r, Mathf.Min (g, b));
 			float dif = max - min;
@@ -56,30 +54,18 @@ namespace RagePixel2
 			if (max > min)
 			{
 				if (g == max)
-				{
 					ret.h = (b - r)/dif*60f + 120f;
-				}
 				else if (b == max)
-				{
 					ret.h = (r - g)/dif*60f + 240f;
-				}
 				else if (b > g)
-				{
 					ret.h = (g - b)/dif*60f + 360f;
-				}
 				else
-				{
 					ret.h = (g - b)/dif*60f;
-				}
 				if (ret.h < 0)
-				{
 					ret.h = ret.h + 360f;
-				}
 			}
 			else
-			{
 				ret.h = 0;
-			}
 
 			ret.h *= 1f/360f;
 			ret.s = (dif/max)*1f;
@@ -177,13 +163,9 @@ namespace RagePixel2
 			else
 			{
 				if (a.s == 0)
-				{
 					h = b.h;
-				}
 				else if (b.s == 0)
-				{
 					h = a.h;
-				}
 				else
 				{
 					// works around bug with LerpAngle
