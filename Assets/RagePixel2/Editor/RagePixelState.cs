@@ -155,12 +155,22 @@ namespace RagePixel2
 
 		public Vector2 ScreenToPixel (Vector2 screenPosition)
 		{
-			return Utility.ScreenToPixel (screenPosition, transform, sprite);
+			return ScreenToPixel(screenPosition, true);
+		}
+
+		public Vector2 ScreenToPixel (Vector2 screenPosition, bool clamp)
+		{
+			return Utility.ScreenToPixel (screenPosition, transform, sprite, clamp);
 		}
 
 		public Vector2 PixelToScreen (Vector2 pixelPosition)
 		{
-			return Utility.PixelToScreen (pixelPosition, transform, sprite);
+			return PixelToScreen (pixelPosition, true);
+		}
+
+		public Vector2 PixelToScreen (Vector2 pixelPosition, bool clamp)
+		{
+			return Utility.PixelToScreen (pixelPosition, transform, sprite, clamp);
 		}
 
 		public void OnPlayModeChanged ()
@@ -185,6 +195,8 @@ namespace RagePixel2
 				OnEnterColorReplacerMode ();
 			if (oldMode == SceneMode.ReplaceColor)
 				OnExitColorReplacerMode ();
+
+			SceneView.RepaintAll ();
 		}
 
 		public void ApplyColorReplace ()

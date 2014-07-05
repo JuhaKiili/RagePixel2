@@ -150,20 +150,55 @@ namespace RagePixel2
 
 		public static Vector2 ScreenToPixel (Vector2 screenPosition, Transform transform, Sprite sprite)
 		{
+			return ScreenToPixel (screenPosition, transform, sprite, true);
+		}
+			
+		public static Vector2 ScreenToPixel (Vector2 screenPosition, Transform transform, Sprite sprite, bool clamp)
+		{
 			Vector3 localPosition = Utility.ScreenToLocal (screenPosition, transform);
-			Vector2 uvPosition = Utility.LocalToUV (localPosition, sprite);
-			Vector2 pixelPosition = Utility.UVToPixel (uvPosition, sprite);
+			Vector2 uvPosition = Utility.LocalToUV (localPosition, sprite, clamp);
+			Vector2 pixelPosition = Utility.UVToPixel (uvPosition, sprite, clamp);
 			return pixelPosition;
 		}
 
 		public static Vector2 PixelToScreen (Vector2 pixelPosition, Transform transform, Sprite sprite)
 		{
-			Vector2 uvPosition = Utility.PixelToUV (pixelPosition, sprite);
-			Vector3 localPosition = Utility.UVToLocal (uvPosition, sprite);
+			return PixelToScreen (pixelPosition, transform, sprite, true);
+		}
+
+		public static Vector2 PixelToScreen (Vector2 pixelPosition, Transform transform, Sprite sprite, bool clamp)
+		{
+			Vector2 uvPosition = Utility.PixelToUV (pixelPosition, sprite, clamp);
+			Vector3 localPosition = Utility.UVToLocal (uvPosition, sprite, clamp);
 			Vector2 screenPosition = Utility.LocalToScreen (localPosition, transform);
 			return screenPosition;
 		}
 
+		public static Vector2 WorldToPixel (Vector2 worldPosition, Transform transform, Sprite sprite)
+		{
+			return WorldToPixel (worldPosition, transform, sprite, true);
+		}
+
+		public static Vector2 WorldToPixel (Vector2 worldPosition, Transform transform, Sprite sprite, bool clamp)
+		{
+			Vector3 localPosition = Utility.WorldToLocal (worldPosition, transform);
+			Vector2 uvPosition = Utility.LocalToUV (localPosition, sprite, clamp);
+			Vector2 pixelPosition = Utility.UVToPixel (uvPosition, sprite, clamp);
+			return pixelPosition;
+		}
+
+		public static Vector3 PixelToWorld (Vector2 pixelPosition, Transform transform, Sprite sprite)
+		{
+			return PixelToWorld (pixelPosition, transform, sprite, true);
+		}
+
+		public static Vector3 PixelToWorld (Vector2 pixelPosition, Transform transform, Sprite sprite, bool clamp)
+		{
+			Vector2 uvPosition = Utility.PixelToUV (pixelPosition, sprite, clamp);
+			Vector3 localPosition = Utility.UVToLocal (uvPosition, sprite, clamp);
+			Vector2 worldPosition = Utility.LocalToWorld (localPosition, transform);
+			return worldPosition;
+		}
 
 		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Color fillColor, Transform transform, Sprite sprite)
 		{
@@ -200,6 +235,19 @@ namespace RagePixel2
 			Handles.DrawPolyLine (screenPolyLine);
 
 			Handles.EndGUI ();
+		}
+
+		public static void DrawRectangle (Vector3 worldPosition1, Vector2 worldPosition2, Color color)
+		{
+			Vector3[] polyLine = new Vector3[5];
+			polyLine[0] = new Vector3(worldPosition1.x, worldPosition1.y, worldPosition1.z);
+			polyLine[1] = new Vector3(worldPosition2.x, worldPosition1.y, worldPosition1.z);
+			polyLine[2] = new Vector3(worldPosition2.x, worldPosition2.y, worldPosition1.z);
+			polyLine[3] = new Vector3(worldPosition1.x, worldPosition2.y, worldPosition1.z);
+			polyLine[4] = new Vector3(worldPosition1.x, worldPosition1.y, worldPosition1.z);
+			Handles.color = color;
+			
+			Handles.DrawPolyLine (polyLine);
 		}
 
 		public static void DrawDebugPoint (Vector3 point)

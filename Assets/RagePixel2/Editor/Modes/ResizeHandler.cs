@@ -30,6 +30,8 @@ namespace RagePixel2
 				localPos = Utility.WorldToLocal (worldPos, state.transform);
 				uvPos = Utility.LocalToUV (localPos, state.sprite, false);
 				m_Size = Utility.UVToPixel (uvPos, state.sprite, false);
+				m_Size = new Vector2((int)m_Size.x, (int)m_Size.y);
+				state.Repaint ();
 			}
 		}
 
@@ -55,7 +57,17 @@ namespace RagePixel2
 
 		public void OnRepaint (RagePixelState state)
 		{
-			
+			Utility.DrawRectangle (
+				Utility.PixelToWorld(Vector2.zero, state.transform, state.sprite, false), 
+				Utility.PixelToWorld(m_Size, state.transform, state.sprite, false), Color.white
+				);
+
+			Vector2 handleScreenPos = state.PixelToScreen (m_Size, false);
+			Vector2 labelScreenPos = handleScreenPos + new Vector2 (16f, -8f);
+
+			Handles.BeginGUI();
+			GUI.Label (new Rect(labelScreenPos.x, labelScreenPos.y, 100f, 100f), (int)m_Size.x + " x " + (int)m_Size.y);
+			Handles.EndGUI();
 		}
 
 		public bool AllowRMBColorPick ()
