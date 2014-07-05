@@ -13,34 +13,72 @@ namespace RagePixel2
 
 		public static Vector2 UVToPixel (Vector2 uv, Sprite sprite)
 		{
-			if (sprite == null)
-				return Vector2.zero;
-
-			return new Vector2 (Mathf.Min (uv.x, 1.0f - k_UVEpsilon)*sprite.texture.width,
-				Mathf.Min (uv.y, 1.0f - k_UVEpsilon)*sprite.texture.height);
+			return UVToPixel (uv, sprite, true);
 		}
 
-		public static Vector2 PixelToUV (Vector2 pixel, Sprite sprite)
+		public static Vector2 UVToPixel (Vector2 uv, Sprite sprite, bool clamp)
 		{
 			if (sprite == null)
 				return Vector2.zero;
 
-			return new Vector2 (pixel.x/sprite.texture.width, pixel.y/sprite.texture.height);
+			Vector2 result = new Vector2(uv.x, uv.y);
+
+			if (clamp)
+				result = new Vector2 (
+					Mathf.Max (Mathf.Min (result.x, 1.0f - k_UVEpsilon), 0f),
+					Mathf.Max (Mathf.Min (result.y, 1.0f - k_UVEpsilon), 0f)
+					);
+
+			result = new Vector2(result.x * sprite.texture.width, result.y * sprite.texture.height);
+
+			return result;
+		}
+
+		public static Vector2 PixelToUV (Vector2 pixel, Sprite sprite)
+		{
+			return PixelToUV (pixel, sprite, true);
+		}
+
+		public static Vector2 PixelToUV (Vector2 pixel, Sprite sprite, bool clamp)
+		{
+			if (sprite == null)
+				return Vector2.zero;
+
+			Vector2 result = new Vector2 (pixel.x / sprite.texture.width, pixel.y / sprite.texture.height);
+
+			if (clamp)
+				result = new Vector2 (
+					Mathf.Max (Mathf.Min (result.x, 1.0f - k_UVEpsilon), 0f),
+					Mathf.Max (Mathf.Min (result.y, 1.0f - k_UVEpsilon), 0f)
+					);
+
+			return result;
 		}
 
 		public static Vector2 LocalToUV (Vector3 localPosition, Sprite sprite)
+		{
+			return LocalToUV (localPosition, sprite, true);
+		}
+
+		public static Vector2 LocalToUV (Vector3 localPosition, Sprite sprite, bool clamp)
 		{
 			if (sprite == null)
 				return Vector2.zero;
 
 			Vector2 localNormalizedPosition = new Vector2 (
-				Mathf.Clamp01 ((localPosition.x - sprite.bounds.min.x)/sprite.bounds.size.x),
-				Mathf.Clamp01 ((localPosition.y - sprite.bounds.min.y)/sprite.bounds.size.y)
+				(localPosition.x - sprite.bounds.min.x) / sprite.bounds.size.x,
+				(localPosition.y - sprite.bounds.min.y) / sprite.bounds.size.y
 				);
 
+			if (clamp)
+				localNormalizedPosition = new Vector2 (
+					Mathf.Clamp01 (localNormalizedPosition.x),
+					Mathf.Clamp01 (localNormalizedPosition.y)
+					);
+			
 			Vector3 textureUV = new Vector2 (
-				localNormalizedPosition.x*(sprite.rect.width/sprite.texture.width) + sprite.textureRect.xMin,
-				localNormalizedPosition.y*(sprite.rect.height/sprite.texture.height) + sprite.textureRect.yMin
+				localNormalizedPosition.x * (sprite.rect.width / sprite.texture.width) + sprite.textureRect.xMin,
+				localNormalizedPosition.y * (sprite.rect.height / sprite.texture.height) + sprite.textureRect.yMin
 				);
 
 			return textureUV;
@@ -48,13 +86,26 @@ namespace RagePixel2
 
 		public static Vector3 UVToLocal (Vector2 uv, Sprite sprite)
 		{
+			return UVToLocal (uv, sprite, true);
+		}
+
+		public static Vector3 UVToLocal (Vector2 uv, Sprite sprite, bool clamp)
+		{
 			if (sprite == null)
 				return Vector2.zero;
 
 			Vector2 localNormalizedPosition = new Vector2 (
-				Mathf.Clamp01 ((uv.x - sprite.textureRect.xMin)/(sprite.rect.width/sprite.texture.width)),
-				Mathf.Clamp01 ((uv.y - sprite.textureRect.yMin)/(sprite.rect.height/sprite.texture.height))
+				(uv.x - sprite.textureRect.xMin) / (sprite.rect.width / sprite.texture.width),
+				(uv.y - sprite.textureRect.yMin) / (sprite.rect.height / sprite.texture.height)
 				);
+
+			if (clamp)
+			{
+				localNormalizedPosition = new Vector2 (
+					Mathf.Clamp01 (localNormalizedPosition.x),
+					Mathf.Clamp01 (localNormalizedPosition.y)
+					);
+			}
 
 			Vector2 localPosition = new Vector2 (
 				localNormalizedPosition.x*sprite.bounds.size.x + sprite.bounds.min.x,
@@ -62,6 +113,11 @@ namespace RagePixel2
 				);
 
 			return localPosition;
+		}
+
+		public static Vector3 WorldToLocal (Vector3 worldPosition, Transform transform)
+		{
+			return transform.InverseTransformPoint (worldPosition);
 		}
 
 		public static Vector3 LocalToWorld (Vector3 localPosition, Transform transform)

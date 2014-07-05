@@ -19,6 +19,7 @@ namespace RagePixel2
 		private PaintHandler m_PaintHandler;
 		private FloodFillHandler m_FloodFillHandler;
 		private ReplaceColorHandler m_ReplaceColorHandler;
+		private ResizeHandler m_ResizeHandler;
 
 		private Tool m_PreviousTool;
 		private bool m_MouseIsDown;
@@ -114,6 +115,16 @@ namespace RagePixel2
 				if (m_ReplaceColorHandler == null)
 					m_ReplaceColorHandler = new ReplaceColorHandler ();
 				return m_ReplaceColorHandler;
+			}
+		}
+
+		public ResizeHandler resizeHandler
+		{
+			get
+			{
+				if (m_ResizeHandler == null)
+					m_ResizeHandler = new ResizeHandler (sprite.textureRect.size);
+				return m_ResizeHandler;
 			}
 		}
 
@@ -292,6 +303,9 @@ namespace RagePixel2
 					break;
 				case SceneMode.ReplaceColor:
 					handler = replaceColorHandler;
+					break;
+				case SceneMode.Resize:
+					handler = resizeHandler;
 					break;
 			}
 			return handler;
