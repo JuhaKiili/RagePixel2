@@ -31,7 +31,7 @@ namespace RagePixel2
 				return;
 
 			m_LastMousePixel = null;
-			Utility.SaveImageData (state.sprite);
+			Utility.SaveImageData (state.sprite, false);
 			Event.current.Use ();
 		}
 

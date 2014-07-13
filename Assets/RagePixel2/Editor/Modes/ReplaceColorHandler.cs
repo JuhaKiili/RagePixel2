@@ -39,10 +39,7 @@ namespace RagePixel2
 
 		public void SaveSnapshot (Sprite sprite)
 		{
-			Texture2D texture = sprite.texture;
-			Rect textureRect = sprite.textureRect;
-			m_Snapshot = texture.GetPixels ((int)textureRect.xMin, (int)textureRect.yMin, (int)textureRect.width,
-				(int)textureRect.height);
+			m_Snapshot = Utility.GetPixels (sprite);
 		}
 
 		public void ReplaceColor (Sprite sprite, Color from, Color to)
@@ -70,7 +67,7 @@ namespace RagePixel2
 
 		public void Apply (Sprite sprite)
 		{
-			Utility.SaveImageData (sprite);
+			Utility.SaveImageData (sprite, false);
 			m_Snapshot = null;
 		}
 

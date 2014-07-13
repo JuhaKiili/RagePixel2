@@ -30,7 +30,7 @@ namespace RagePixel2
 		{
 			if (Event.current.button == 0)
 			{
-				Utility.SaveImageData (state.sprite);
+				Utility.SaveImageData (state.sprite, false);
 				Event.current.Use ();
 			}
 		}

@@ -353,17 +353,20 @@ namespace RagePixel2
 			return Vector3.zero;
 		}
 
-		public static void SaveImageData (Sprite sprite)
+		public static void SaveImageData (Sprite sprite, bool reimport)
 		{
 			Texture2D texture = sprite.texture;
 			string path = AssetDatabase.GetAssetPath (texture);
-			TextureImporter textureImporter = AssetImporter.GetAtPath (path) as TextureImporter;
+			
+			TextureImporter textureImporter = GetTextureImporter (sprite);
 
 			if (textureImporter == null)
 				return;
 
 			File.WriteAllBytes (path, texture.EncodeToPNG ());
-			//AssetDatabase.ImportAsset(path);
+
+			if (reimport)
+				AssetDatabase.ImportAsset(path);
 		}
 
 		public static bool SameColor (Color a, Color b)
@@ -371,6 +374,52 @@ namespace RagePixel2
 			const float epsilon = 0.01f;
 			return Mathf.Abs (a.r - b.r) < epsilon && Mathf.Abs (a.g - b.g) < epsilon && Mathf.Abs (a.b - b.b) < epsilon &&
 			       Mathf.Abs (a.a - b.a) < epsilon;
+		}
+
+		public static Color[] GetPixels (Sprite sprite)
+		{
+			Texture2D texture = sprite.texture;
+			Rect textureRect = sprite.textureRect;
+			return texture.GetPixels ((int)textureRect.xMin, (int)textureRect.yMin, (int)textureRect.width, (int)textureRect.height);
+		}
+
+		public static Color32[] GetDefaultPixels (int sizeX, int sizeY)
+		{
+			Color32[] pixels = new Color32[sizeX * sizeY];
+			Color32 defaultColor = GetDefaultColor ();
+			for (int i = 0; i < pixels.Length; i++)
+				pixels[i] = defaultColor;
+
+			return pixels;
+		}
+
+		public static Vector2 GetNormalizedPivot (Sprite sprite)
+		{
+			TextureImporter importer = GetTextureImporter (sprite);
+			SpriteMetaData[] spritesheet = importer.spritesheet;
+			
+			foreach (SpriteMetaData metaData in spritesheet)
+				if (metaData.name == sprite.name)
+					return metaData.pivot;
+
+			TextureImporterSettings settings = new TextureImporterSettings();
+			importer.ReadTextureSettings (settings);
+			
+			if (settings.spriteAlignment == (int)SpriteAlignment.Custom)
+				return importer.spritePivot;
+
+			return GetAlignedPivot ((SpriteAlignment)settings.spriteAlignment);
+		}
+
+		public static float GetPixelsToUnits (Sprite sprite)
+		{
+			return sprite.textureRect.width / sprite.bounds.size.x;
+		}
+
+		private static TextureImporter GetTextureImporter (Sprite sprite)
+		{
+			string path = AssetDatabase.GetAssetPath (sprite.texture);
+			return AssetImporter.GetAtPath (path) as TextureImporter;
 		}
 
 		private static Sprite CreateNewSprite (string path)
@@ -416,9 +465,10 @@ namespace RagePixel2
 		{
 			Texture2D t = new Texture2D (32, 32);
 			Color32[] colors = new Color32[32*32];
+			Color defaultColor = GetDefaultColor ();
 
 			for (int i = 1; i < colors.Length - 1; i++)
-				colors[i] = new Color32 (128, 128, 128, 255);
+				colors[i] = defaultColor;
 
 			colors[0] = new Color32 (128, 128, 128, 0);
 			colors[31] = new Color32 (128, 128, 128, 0);
@@ -427,6 +477,37 @@ namespace RagePixel2
 
 			t.SetPixels32 (colors);
 			return t;
+		}
+
+		private static Vector2 GetAlignedPivot (SpriteAlignment alignment)
+		{
+			switch (alignment)
+			{
+				case SpriteAlignment.TopLeft:
+					return new Vector2(0, 1);
+				case SpriteAlignment.TopCenter:
+					return new Vector2(.5f, 1);
+				case SpriteAlignment.TopRight:
+					return new Vector2(1, 1);
+				case SpriteAlignment.LeftCenter:
+					return new Vector2(0, .5f);
+				case SpriteAlignment.Center:
+					return new Vector2(.5f, .5f);
+				case SpriteAlignment.RightCenter:
+					return new Vector2(1, .5f);
+				case SpriteAlignment.BottomLeft:
+					return new Vector2(0, 0);
+				case SpriteAlignment.BottomCenter:
+					return new Vector2(.5f, 0);
+				case SpriteAlignment.BottomRight:
+					return new Vector2(1, 0);
+			}
+			return new Vector2(.5f, .5f);
+		}
+
+		private static Color GetDefaultColor ()
+		{
+			return new Color32 (128, 128, 128, 255);
 		}
 	}
 }
