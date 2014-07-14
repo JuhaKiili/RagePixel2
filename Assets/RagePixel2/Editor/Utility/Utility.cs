@@ -200,18 +200,21 @@ namespace RagePixel2
 			return worldPosition;
 		}
 
-		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Color fillColor, Transform transform, Sprite sprite)
+		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Brush brush, Transform transform, Sprite sprite)
 		{
 			Vector2 pixel = ScreenToPixel (screenPosition, transform, sprite);
 
+			Vector2 minPixel = new Vector2 ((int)(pixel.x - brush.m_SizeX * .5f + .5f), (int)(pixel.y - brush.m_SizeY * .5f + .5f));
+			Vector2 maxPixel = new Vector2 ((int)(pixel.x + brush.m_SizeX * .5f + .5f), (int)(pixel.y + brush.m_SizeY * .5f + .5f));
+
 			Vector3[] screenPolyLine = new Vector3[5];
-			screenPolyLine[0] = PixelToScreen (new Vector2 (Mathf.FloorToInt (pixel.x), Mathf.FloorToInt (pixel.y)), transform,
+			screenPolyLine[0] = PixelToScreen (new Vector2 (Mathf.FloorToInt (minPixel.x), Mathf.FloorToInt (minPixel.y)), transform,
 				sprite);
-			screenPolyLine[1] = PixelToScreen (new Vector2 (Mathf.FloorToInt (pixel.x + 1), Mathf.FloorToInt (pixel.y)),
+			screenPolyLine[1] = PixelToScreen (new Vector2 (Mathf.FloorToInt (maxPixel.x), Mathf.FloorToInt (minPixel.y)),
 				transform, sprite);
-			screenPolyLine[2] = PixelToScreen (new Vector2 (Mathf.FloorToInt (pixel.x + 1), Mathf.FloorToInt (pixel.y + 1)),
+			screenPolyLine[2] = PixelToScreen (new Vector2 (Mathf.FloorToInt (maxPixel.x), Mathf.FloorToInt (maxPixel.y)),
 				transform, sprite);
-			screenPolyLine[3] = PixelToScreen (new Vector2 (Mathf.FloorToInt (pixel.x), Mathf.FloorToInt (pixel.y + 1)),
+			screenPolyLine[3] = PixelToScreen (new Vector2 (Mathf.FloorToInt (minPixel.x), Mathf.FloorToInt (maxPixel.y)),
 				transform, sprite);
 			screenPolyLine[4] = screenPolyLine[0];
 
@@ -224,7 +227,7 @@ namespace RagePixel2
 			GL.Begin (GL.QUADS);
 			for (int i = 0; i < screenPolyLine.Length - 1; i++)
 			{
-				GL.Color (fillColor);
+				GL.Color (brush.m_Colors[0]);
 				GL.Vertex3 (screenPolyLine[i].x, screenPolyLine[i].y, screenPolyLine[i].z);
 			}
 			GL.End ();
@@ -237,7 +240,7 @@ namespace RagePixel2
 			Handles.EndGUI ();
 		}
 
-		public static void DrawRectangle (Vector3 worldPosition1, Vector2 worldPosition2, Color color)
+		public static void DrawRectangle (Vector3 worldPosition1, Vector3 worldPosition2, Color color)
 		{
 			Vector3[] polyLine = new Vector3[5];
 			polyLine[0] = new Vector3(worldPosition1.x, worldPosition1.y, worldPosition1.z);
@@ -414,6 +417,16 @@ namespace RagePixel2
 		public static float GetPixelsToUnits (Sprite sprite)
 		{
 			return sprite.textureRect.width / sprite.bounds.size.x;
+		}
+
+		public static Rect GetPixelMarqueeRect (Vector2 pixelA, Vector2 pixelB)
+		{
+			int minX = Mathf.Min ((int)pixelA.x, (int)pixelB.x);
+			int minY = Mathf.Min ((int)pixelA.y, (int)pixelB.y);
+			int maxX = Mathf.Max ((int)pixelA.x, (int)pixelB.x);
+			int maxY = Mathf.Max ((int)pixelA.y, (int)pixelB.y);
+
+			return new Rect(minX, minY, maxX - minX, maxY - minY);
 		}
 
 		private static TextureImporter GetTextureImporter (Sprite sprite)

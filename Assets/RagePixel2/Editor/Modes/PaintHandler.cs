@@ -18,7 +18,10 @@ namespace RagePixel2
 				return;
 
 			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition);
-			state.sprite.texture.SetPixel ((int)pixel.x, (int)pixel.y, state.paintColor);
+
+			Vector2 minPixel = new Vector2 ((int)(pixel.x - state.brush.m_SizeX * .5f + .5f), (int)(pixel.y - state.brush.m_SizeY * .5f + .5f));
+			
+			state.sprite.texture.SetPixels ((int)minPixel.x, (int)minPixel.y, state.brush.m_SizeX, state.brush.m_SizeY, state.brush.m_Colors);
 			state.sprite.texture.Apply ();
 			m_LastMousePixel = pixel;
 			state.Repaint ();

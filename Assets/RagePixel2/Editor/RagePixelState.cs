@@ -23,6 +23,10 @@ namespace RagePixel2
 
 		private Tool m_PreviousTool;
 		private bool m_MouseIsDown;
+		private Brush m_Brush;
+
+		private Vector2? m_MarqueeStart;
+		private Vector2? m_MarqueeEnd;
 
 		public Object target
 		{
@@ -63,6 +67,17 @@ namespace RagePixel2
 				replaceColorHandler.ReplaceColor (sprite, paintColor, value);
 				m_ReplaceTargetColor = value;
 			}
+		}
+
+		public Brush brush
+		{
+			get
+			{
+				if (m_Brush == null)
+					m_Brush = new Brush(1, 1, paintColor);
+				return m_Brush;
+			}
+			set { m_Brush = value; }
 		}
 
 		public SceneMode mode
@@ -150,7 +165,7 @@ namespace RagePixel2
 		{
 			Color color = m_MouseIsDown ? Color.white : new Color (1f, 1f, 1f, 0.4f);
 			Color shadowColor = m_MouseIsDown ? Color.black : new Color (0f, 0f, 0f, 0.4f);
-			Utility.DrawPaintGizmo (Event.current.mousePosition, color, shadowColor, paintColor, transform, sprite);
+			Utility.DrawPaintGizmo (Event.current.mousePosition, color, shadowColor, brush, transform, sprite);
 		}
 
 		public Vector2 ScreenToPixel (Vector2 screenPosition)
@@ -327,10 +342,12 @@ namespace RagePixel2
 		{
 			if (Event.current.button > 0)
 			{
+				Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
+				pixel = new Vector2((int)pixel.x, (int)pixel.y);		
+
 				switch (Event.current.type)
 				{
 					case EventType.MouseDown:
-						Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
 						Color newColor = sprite.texture.GetPixel ((int)pixel.x, (int)pixel.y);
 
 						if (mode == SceneMode.ReplaceColor)
@@ -339,13 +356,34 @@ namespace RagePixel2
 							paintColor = newColor;
 
 						Event.current.Use ();
+						m_MarqueeStart = pixel;
+						m_MarqueeEnd = pixel;
 						Repaint ();
 						break;
+					case EventType.MouseDrag:
+						m_MarqueeEnd = pixel;
+						Event.current.Use();
+						break;
 					case EventType.MouseUp:
+						Rect r = Utility.GetPixelMarqueeRect ((Vector2)m_MarqueeStart, (Vector2)m_MarqueeEnd);
+						r.height += 1;
+						r.width += 1;
+						brush = new Brush(sprite.texture, r);
+						m_MarqueeStart = null;
+						m_MarqueeEnd = null;
 						Event.current.Use ();
 						Repaint ();
 						break;
 				}
+			}
+			if (Event.current.type == EventType.Repaint && m_MarqueeStart != null && m_MarqueeEnd != null)
+			{
+				Rect r = Utility.GetPixelMarqueeRect ((Vector2)m_MarqueeStart, (Vector2)m_MarqueeEnd);
+				Utility.DrawRectangle (
+					Utility.PixelToWorld (new Vector2(r.xMin, r.yMin), transform, sprite, false),
+					Utility.PixelToWorld (new Vector2(r.xMax + 1, r.yMax + 1), transform, sprite, false), 
+					Color.white
+				);
 			}
 		}
 
