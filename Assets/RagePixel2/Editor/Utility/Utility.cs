@@ -223,14 +223,14 @@ namespace RagePixel2
 				shadowPolyLine[i] = screenPolyLine[i] + new Vector3 (1f, 1f, 0f);
 
 			Handles.BeginGUI ();
-
-			GL.Begin (GL.QUADS);
-			for (int i = 0; i < screenPolyLine.Length - 1; i++)
-			{
-				GL.Color (brush.m_Colors[0]);
-				GL.Vertex3 (screenPolyLine[i].x, screenPolyLine[i].y, screenPolyLine[i].z);
-			}
-			GL.End ();
+			GUI.DrawTexture (
+				new Rect(
+					screenPolyLine[0].x, 
+					screenPolyLine[0].y, 
+					screenPolyLine[2].x - screenPolyLine[0].x,
+					screenPolyLine[2].y - screenPolyLine[0].y
+					), brush.brushTexture
+				);
 
 			Handles.color = shadowColor;
 			Handles.DrawPolyLine (shadowPolyLine);
@@ -417,6 +417,18 @@ namespace RagePixel2
 		public static float GetPixelsToUnits (Sprite sprite)
 		{
 			return sprite.textureRect.width / sprite.bounds.size.x;
+		}
+
+		public static Color[] GetYReversed (Color[] colors, int sizeX, int sizeY)
+		{
+			Color[] result = new Color[colors.Length];
+
+			int i = 0;
+			for (int y = sizeY - 1; y >= 0; y--)
+				for (int x = 0; x < sizeX; x++)
+					result[i++] = colors[y*sizeX + x];
+
+			return result;
 		}
 
 		public static Rect GetPixelMarqueeRect (Vector2 pixelA, Vector2 pixelB)
