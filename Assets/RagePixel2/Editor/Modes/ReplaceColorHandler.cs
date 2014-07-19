@@ -80,7 +80,7 @@ namespace RagePixel2
 			m_Snapshot = null;
 		}
 
-		public bool AllowRMBColorPick ()
+		public bool AllowRightMouseButtonDefaultBehaviour ()
 		{
 			return true;
 		}

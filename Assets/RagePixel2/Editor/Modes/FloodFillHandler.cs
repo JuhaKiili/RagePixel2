@@ -50,7 +50,7 @@ namespace RagePixel2
 			state.DrawBasicPaintGizmo ();
 		}
 
-		public bool AllowRMBColorPick ()
+		public bool AllowRightMouseButtonDefaultBehaviour ()
 		{
 			return true;
 		}

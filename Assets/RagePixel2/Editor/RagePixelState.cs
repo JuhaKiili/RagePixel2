@@ -16,6 +16,8 @@ namespace RagePixel2
 		[SerializeField] private Color m_PaintColor = Color.green;
 		[SerializeField] private Color m_ReplaceTargetColor = Color.blue;
 
+		private RightMouseButtonHandler m_RightMouseButtonHandler;
+
 		private PaintHandler m_PaintHandler;
 		private FloodFillHandler m_FloodFillHandler;
 		private ReplaceColorHandler m_ReplaceColorHandler;
@@ -24,9 +26,6 @@ namespace RagePixel2
 		private Tool m_PreviousTool;
 		private bool m_MouseIsDown;
 		private Brush m_Brush;
-
-		private Vector2? m_MarqueeStart;
-		private Vector2? m_MarqueeEnd;
 
 		public Object target
 		{
@@ -100,6 +99,16 @@ namespace RagePixel2
 				return sprite != null &&
 				       (PrefabUtility.GetPrefabType (target) == PrefabType.None ||
 				        PrefabUtility.GetPrefabType (target) == PrefabType.PrefabInstance);
+			}
+		}
+
+		public RightMouseButtonHandler rightMouseButtonHandler
+		{
+			get
+			{
+				if (m_RightMouseButtonHandler == null)
+					m_RightMouseButtonHandler = new RightMouseButtonHandler ();
+				return m_RightMouseButtonHandler;
 			}
 		}
 
@@ -260,10 +269,11 @@ namespace RagePixel2
 			UpdateHotControl ();
 			UpdateCursor ();
 
-			if (handler.AllowRMBColorPick ())
-				HandleColorPicking ();
+			if (handler.AllowRightMouseButtonDefaultBehaviour ())
+				TriggerModeEventHandler (rightMouseButtonHandler);
 
-			TriggerModeEventHandler (handler);
+			if (!rightMouseButtonHandler.active)
+				TriggerModeEventHandler (handler);
 		}
 
 		private void UpdateCursor ()
@@ -337,56 +347,7 @@ namespace RagePixel2
 			}
 			return handler;
 		}
-
-		private void HandleColorPicking ()
-		{
-			if (Event.current.button > 0)
-			{
-				Vector2 pixel = ScreenToPixel (Event.current.mousePosition);
-				pixel = new Vector2((int)pixel.x, (int)pixel.y);		
-
-				switch (Event.current.type)
-				{
-					case EventType.MouseDown:
-						Color newColor = sprite.texture.GetPixel ((int)pixel.x, (int)pixel.y);
-
-						if (mode == SceneMode.ReplaceColor)
-							replaceTargetColor = newColor;
-						else
-							paintColor = newColor;
-
-						Event.current.Use ();
-						m_MarqueeStart = pixel;
-						m_MarqueeEnd = pixel;
-						Repaint ();
-						break;
-					case EventType.MouseDrag:
-						m_MarqueeEnd = pixel;
-						Event.current.Use();
-						break;
-					case EventType.MouseUp:
-						Rect r = Utility.GetPixelMarqueeRect ((Vector2)m_MarqueeStart, (Vector2)m_MarqueeEnd);
-						r.height += 1;
-						r.width += 1;
-						brush = new Brush(sprite.texture, r);
-						m_MarqueeStart = null;
-						m_MarqueeEnd = null;
-						Event.current.Use ();
-						Repaint ();
-						break;
-				}
-			}
-			if (Event.current.type == EventType.Repaint && m_MarqueeStart != null && m_MarqueeEnd != null)
-			{
-				Rect r = Utility.GetPixelMarqueeRect ((Vector2)m_MarqueeStart, (Vector2)m_MarqueeEnd);
-				Utility.DrawRectangle (
-					Utility.PixelToWorld (new Vector2(r.xMin, r.yMin), transform, sprite, false),
-					Utility.PixelToWorld (new Vector2(r.xMax + 1, r.yMax + 1), transform, sprite, false), 
-					Color.white
-				);
-			}
-		}
-
+		
 		public enum SceneMode
 		{
 			Default = 0,

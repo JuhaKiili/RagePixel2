@@ -84,7 +84,7 @@ namespace RagePixel2
 			DrawSizeLabel (state);
 		}
 
-		public bool AllowRMBColorPick ()
+		public bool AllowRightMouseButtonDefaultBehaviour ()
 		{
 			return false;
 		}

@@ -48,8 +48,7 @@ namespace RagePixel2
 			m_State.paintColor = Utility.PaintColorField (m_State.paintColor, k_ButtonSize, k_ButtonSize);
 			if (m_State.mode == RagePixelState.SceneMode.ReplaceColor)
 			{
-				m_State.replaceTargetColor = Utility.PaintColorField (m_State.replaceTargetColor, k_ButtonSize,
-					k_ButtonSize);
+				m_State.replaceTargetColor = Utility.PaintColorField (m_State.replaceTargetColor, k_ButtonSize, k_ButtonSize);
 				if (GUILayout.Button ("OK", GUILayout.Width (k_ButtonSize), GUILayout.Height ((k_ButtonSize))))
 					m_State.ApplyColorReplace ();
 			}
