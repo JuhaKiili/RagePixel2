@@ -24,7 +24,6 @@ namespace RagePixel2
 		private ResizeHandler m_ResizeHandler;
 		private CreateSpriteHandler m_CreateSpriteHandler;
 
-		private Tool m_PreviousTool;
 		private bool m_MouseIsDown;
 		private Brush m_Brush;
 
@@ -170,7 +169,6 @@ namespace RagePixel2
 			SceneView.onSceneGUIDelegate += OnSceneGUI;
 			EditorApplication.playmodeStateChanged += OnPlayModeChanged;
 
-			m_PreviousTool = Tool.Move;
 			Tools.current = Tool.Move;
 		}
 
@@ -217,14 +215,14 @@ namespace RagePixel2
 		private void ResetMode ()
 		{
 			m_Mode = SceneMode.Default;
-			Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
+			Tools.current = Tool.Move;
 			if (Repaint != null)
 				Repaint ();
 		}
 
 		private void OnModeChange (SceneMode oldMode, SceneMode newMode)
 		{
-			PreserveToolsCurrent (oldMode, newMode);
+			UpdateToolsCurrent (oldMode, newMode);
 
 			if (newMode == SceneMode.ReplaceColor)
 				OnEnterColorReplacerMode ();
@@ -232,6 +230,12 @@ namespace RagePixel2
 				OnExitColorReplacerMode ();
 
 			SceneView.RepaintAll ();
+		}
+
+		private void OnUserToolChange ()
+		{
+			m_Mode = SceneMode.Default;
+			Repaint ();
 		}
 
 		public void ApplyColorReplace ()
@@ -252,23 +256,24 @@ namespace RagePixel2
 			replaceTargetColor = paintColor;
 		}
 
-		private void PreserveToolsCurrent (SceneMode oldMode, SceneMode newMode)
+		private void UpdateToolsCurrent (SceneMode oldMode, SceneMode newMode)
 		{
-			if (newMode != SceneMode.Default)
+			if (newMode != SceneMode.Default && oldMode == SceneMode.Default)
 			{
-				if (oldMode == SceneMode.Default)
-					m_PreviousTool = Tools.current;
 				Tools.current = Tool.None;
 			}
 			else
 			{
 				if (Tools.current == Tool.None)
-					Tools.current = m_PreviousTool != Tool.None ? m_PreviousTool : Tool.Move;
+					Tools.current = Tool.Move;					
 			}
 		}
 
 		public void OnSceneGUI (SceneView sceneView)
 		{
+			if (Tools.current != Tool.None)
+				OnUserToolChange ();
+
 			if (sprite == null && mode != SceneMode.CreateSprite)
 				return;
 
