@@ -271,9 +271,15 @@ namespace RagePixel2
 
 		public static Color PaintColorField (Color value, float width, float height)
 		{
+			const int kColorFieldHeightBug = 2;
+
 			// internal static Color ColorField (Rect position, GUIContent label, Color value, bool showEyedropper, bool showAlpha)
 			object[] parameters = new object[5];
-			parameters[0] = EditorGUILayout.GetControlRect (false, GUILayout.Width (width), GUILayout.Height (height));
+
+			Rect rect = EditorGUILayout.GetControlRect (false, GUILayout.Width (width), GUILayout.Height (height));
+			rect.Set (rect.xMin, rect.yMin + kColorFieldHeightBug, rect.width, rect.height - kColorFieldHeightBug);
+
+			parameters[0] = rect;
 			parameters[1] = new GUIContent ("");
 			parameters[2] = value;
 			parameters[3] = false;
@@ -287,6 +293,7 @@ namespace RagePixel2
 			types[4] = typeof (bool);
 
 			object returnValue = Reflection.InvokeEditorStatic ("EditorGUI", "ColorField", parameters, types);
+
 			return (Color)returnValue;
 		}
 
