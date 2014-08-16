@@ -55,7 +55,14 @@ namespace RagePixel2
 		public Color paintColor
 		{
 			get { return m_PaintColor; }
-			set { m_PaintColor = value; }
+			set
+			{
+				if (m_PaintColor != value)
+				{
+					m_Brush = null;
+					m_PaintColor = value;
+				}
+			}
 		}
 
 		public Color replaceTargetColor
