@@ -27,16 +27,26 @@ namespace RagePixel2
 		public void OnGUI ()
 		{
 			GUILayout.BeginHorizontal ();
-			ArrowOnGUI ();
+			DefaultOnGUI ();
+			CreateSpriteOnGUI();
+			GUILayout.EndHorizontal();
+			
+			GUILayout.Space (k_VerticalSpaceBetweenButtons);
+			
+			GUILayout.BeginHorizontal ();
 			EditorGUI.BeginDisabledGroup (!m_State.editingEnabled);
 			PaintColorOnGUI ();
 			GUILayout.EndHorizontal ();
+
 			GUILayout.Space (k_VerticalSpaceBetweenButtons);
+
 			GUILayout.BeginHorizontal ();
 			PencilOnGUI ();
 			FloodFillOnGUI ();
 			GUILayout.EndHorizontal ();
+			
 			GUILayout.Space (k_VerticalSpaceBetweenButtons);
+			
 			GUILayout.BeginHorizontal ();
 			ResizeOnGUI ();
 			GUILayout.EndHorizontal ();
@@ -58,7 +68,12 @@ namespace RagePixel2
 			}
 		}
 
-		public void ArrowOnGUI ()
+		public void CreateSpriteOnGUI ()
+		{
+			BasicModeButton (RagePixelState.SceneMode.CreateSprite, Resources.arrow);
+		}
+
+		public void DefaultOnGUI ()
 		{
 			BasicModeButton (RagePixelState.SceneMode.Default, Resources.arrow);
 		}
@@ -104,7 +119,7 @@ namespace RagePixel2
 			gameObject.name = "New Sprite";
 			gameObject.AddComponent<SpriteRenderer> ();
 			gameObject.transform.position = Utility.GetSceneViewCenter ();
-			gameObject.GetComponent<SpriteRenderer> ().sprite = Utility.CreateNewSprite ();
+			gameObject.GetComponent<SpriteRenderer> ().sprite = Utility.CreateNewSprite (32, 32);
 			gameObject.GetComponent<SpriteRenderer> ().sharedMaterial = Resources.defaultMaterial;
 			Selection.activeGameObject = gameObject;
 			SceneView.FrameLastActiveSceneView ();

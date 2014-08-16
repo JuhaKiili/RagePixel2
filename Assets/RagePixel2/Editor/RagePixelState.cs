@@ -22,6 +22,7 @@ namespace RagePixel2
 		private FloodFillHandler m_FloodFillHandler;
 		private ReplaceColorHandler m_ReplaceColorHandler;
 		private ResizeHandler m_ResizeHandler;
+		private CreateSpriteHandler m_CreateSpriteHandler;
 
 		private Tool m_PreviousTool;
 		private bool m_MouseIsDown;
@@ -152,6 +153,16 @@ namespace RagePixel2
 			}
 		}
 
+		public CreateSpriteHandler createSpriteHandler
+		{
+			get
+			{
+				if (m_CreateSpriteHandler == null)
+					m_CreateSpriteHandler = new CreateSpriteHandler();;
+				return m_CreateSpriteHandler;
+			}
+		}
+
 		public void OnEnable ()
 		{
 			hideFlags = HideFlags.HideAndDontSave;
@@ -258,7 +269,7 @@ namespace RagePixel2
 
 		public void OnSceneGUI (SceneView sceneView)
 		{
-			if (sprite == null)
+			if (sprite == null && mode != SceneMode.CreateSprite)
 				return;
 
 			IRagePixelMode handler = GetModeHandler ();
@@ -344,6 +355,9 @@ namespace RagePixel2
 				case SceneMode.Resize:
 					handler = resizeHandler;
 					break;
+				case SceneMode.CreateSprite:
+					handler = createSpriteHandler;
+					break;
 			}
 			return handler;
 		}
@@ -354,7 +368,8 @@ namespace RagePixel2
 			Paint,
 			FloodFill,
 			ReplaceColor,
-			Resize
+			Resize,
+			CreateSprite
 		}
 	}
 }

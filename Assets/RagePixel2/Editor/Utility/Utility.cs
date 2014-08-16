@@ -9,6 +9,7 @@ namespace RagePixel2
 {
 	public static class Utility
 	{
+		private const float k_DefaultPixelsToUnits = 100f;
 		private const float k_UVEpsilon = 0.00001f;
 
 		public static Vector2 UVToPixel (Vector2 uv, Sprite sprite)
@@ -143,6 +144,14 @@ namespace RagePixel2
 			return mouseRay.GetPoint (dist);
 		}
 
+		public static Vector3 ScreenToWorld (Vector2 screenPosition)
+		{
+			Ray mouseRay = HandleUtility.GUIPointToWorldRay (screenPosition);
+			float dist;
+			new Plane (Vector3.back, Vector3.zero).Raycast (mouseRay, out dist);
+			return mouseRay.GetPoint (dist);
+		}
+
 		public static Vector2 WorldToScreen (Vector3 worldPosition, Transform transform)
 		{
 			return HandleUtility.WorldToGUIPoint (worldPosition);
@@ -173,6 +182,22 @@ namespace RagePixel2
 			Vector2 screenPosition = Utility.LocalToScreen (localPosition, transform);
 			return screenPosition;
 		}
+
+		public static Vector2 WorldToPixel (Vector2 worldPosition)
+		{
+			return new Vector2(
+				worldPosition.x * k_DefaultPixelsToUnits, 
+				worldPosition.y * k_DefaultPixelsToUnits
+				);
+		}
+
+		public static Vector2 PixelToWorld (Vector2 pixelPosition)
+		{
+			return new Vector2(
+				pixelPosition.x / k_DefaultPixelsToUnits, 
+				pixelPosition.y / k_DefaultPixelsToUnits
+				);
+		} 
 
 		public static Vector2 WorldToPixel (Vector2 worldPosition, Transform transform, Sprite sprite)
 		{
@@ -271,13 +296,14 @@ namespace RagePixel2
 
 		public static Color PaintColorField (Color value, float width, float height)
 		{
-			const int kColorFieldHeightBug = 2;
+			const int kColorFieldSizeBug = 2;
+			const int kColorFieldLeftMarginBug = 1;
 
 			// internal static Color ColorField (Rect position, GUIContent label, Color value, bool showEyedropper, bool showAlpha)
 			object[] parameters = new object[5];
 
 			Rect rect = EditorGUILayout.GetControlRect (false, GUILayout.Width (width), GUILayout.Height (height));
-			rect.Set (rect.xMin, rect.yMin + kColorFieldHeightBug, rect.width, rect.height - kColorFieldHeightBug);
+			rect.Set (rect.xMin + kColorFieldLeftMarginBug, rect.yMin + kColorFieldSizeBug, rect.width - kColorFieldSizeBug, rect.height - kColorFieldSizeBug);
 
 			parameters[0] = rect;
 			parameters[1] = new GUIContent ("");
@@ -339,12 +365,12 @@ namespace RagePixel2
 			yield break;
 		}
 
-		public static Sprite CreateNewSprite ()
+		public static Sprite CreateNewSprite (int sizeX, int sizeY)
 		{
 			string path = EditorUtility.SaveFilePanelInProject ("New Sprite", "sprite", "png", "Save New Sprite");
 
 			if (path.Length > 0)
-				return CreateNewSprite (path);
+				return CreateNewSprite (path, sizeX, sizeY);
 
 			return null;
 		}
@@ -454,9 +480,9 @@ namespace RagePixel2
 			return AssetImporter.GetAtPath (path) as TextureImporter;
 		}
 
-		private static Sprite CreateNewSprite (string path)
+		private static Sprite CreateNewSprite (string path, int sizeX, int sizeY)
 		{
-			Texture2D newTexture = CreateDefaultSpriteTexture ();
+			Texture2D newTexture = CreateDefaultSpriteTexture (sizeX, sizeY);
 
 			File.WriteAllBytes (path, newTexture.EncodeToPNG ());
 			Texture2D.DestroyImmediate (newTexture);
@@ -493,18 +519,18 @@ namespace RagePixel2
 			textureImporter.SetTextureSettings (settings);
 		}
 
-		private static Texture2D CreateDefaultSpriteTexture ()
+		private static Texture2D CreateDefaultSpriteTexture (int sizeX, int sizeY)
 		{
-			Texture2D t = new Texture2D (32, 32);
-			Color32[] colors = new Color32[32*32];
+			Texture2D t = new Texture2D (sizeX, sizeY);
+			Color32[] colors = new Color32[sizeX*sizeY];
 			Color defaultColor = GetDefaultColor ();
 
 			for (int i = 1; i < colors.Length - 1; i++)
 				colors[i] = defaultColor;
 
 			colors[0] = new Color32 (128, 128, 128, 0);
-			colors[31] = new Color32 (128, 128, 128, 0);
-			colors[colors.Length - 32] = new Color32 (128, 128, 128, 0);
+			colors[sizeX - 1] = new Color32 (128, 128, 128, 0);
+			colors[colors.Length - sizeX] = new Color32 (128, 128, 128, 0);
 			colors[colors.Length - 1] = new Color32 (128, 128, 128, 0);
 
 			t.SetPixels32 (colors);
