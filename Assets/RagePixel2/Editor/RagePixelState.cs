@@ -239,6 +239,12 @@ namespace RagePixel2
 			SceneView.RepaintAll ();
 		}
 
+		private void OnUserToolChange ()
+		{
+			m_Mode = SceneMode.Default;
+			Repaint ();
+		}
+
 		public void ApplyColorReplace ()
 		{
 			replaceColorHandler.Apply (sprite);
@@ -259,7 +265,7 @@ namespace RagePixel2
 
 		private void UpdateToolsCurrent (SceneMode oldMode, SceneMode newMode)
 		{
-			if (newMode != SceneMode.Default && oldMode == SceneMode.Default)
+			if (newMode != SceneMode.Default)
 			{
 				Tools.current = Tool.None;
 			}
@@ -272,6 +278,9 @@ namespace RagePixel2
 
 		public void OnSceneGUI (SceneView sceneView)
 		{
+			if (Tools.current != Tool.None)
+				OnUserToolChange ();
+
 			if (sprite == null && mode != SceneMode.CreateSprite)
 				return;
 
