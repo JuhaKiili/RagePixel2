@@ -9,8 +9,6 @@ namespace RagePixel2
 {
 	public class CreateSpriteHandler : IRagePixelMode
 	{
-		const float kPixelsToUnits = 100f;
-			
 		private bool m_Dragging = false;
 		private Vector2 m_DragStart;
 
