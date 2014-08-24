@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,14 +17,8 @@ namespace RagePixel2
 		[SerializeField] private Color m_PaintColor = Color.green;
 		[SerializeField] private Color m_ReplaceTargetColor = Color.blue;
 
-		private RightMouseButtonHandler m_RightMouseButtonHandler;
-
-		private PaintHandler m_PaintHandler;
-		private FloodFillHandler m_FloodFillHandler;
-		private ReplaceColorHandler m_ReplaceColorHandler;
-		private ResizeHandler m_ResizeHandler;
-		private CreateSpriteHandler m_CreateSpriteHandler;
-
+		private Hashtable modeHandlerCache;
+		
 		private bool m_MouseIsDown;
 		private Brush m_Brush;
 
@@ -70,7 +65,7 @@ namespace RagePixel2
 			get { return m_ReplaceTargetColor; }
 			set
 			{
-				replaceColorHandler.ReplaceColor (sprite, paintColor, value);
+				GetModeHandler<ReplaceColorHandler>().ReplaceColor (sprite, paintColor, value);
 				m_ReplaceTargetColor = value;
 			}
 		}
@@ -106,66 +101,6 @@ namespace RagePixel2
 				return sprite != null &&
 				       (PrefabUtility.GetPrefabType (target) == PrefabType.None ||
 				        PrefabUtility.GetPrefabType (target) == PrefabType.PrefabInstance);
-			}
-		}
-
-		public RightMouseButtonHandler rightMouseButtonHandler
-		{
-			get
-			{
-				if (m_RightMouseButtonHandler == null)
-					m_RightMouseButtonHandler = new RightMouseButtonHandler ();
-				return m_RightMouseButtonHandler;
-			}
-		}
-
-		public PaintHandler paintHandler
-		{
-			get
-			{
-				if (m_PaintHandler == null)
-					m_PaintHandler = new PaintHandler ();
-				return m_PaintHandler;
-			}
-		}
-
-		public FloodFillHandler floodFillHandler
-		{
-			get
-			{
-				if (m_FloodFillHandler == null)
-					m_FloodFillHandler = new FloodFillHandler ();
-				return m_FloodFillHandler;
-			}
-		}
-
-		public ReplaceColorHandler replaceColorHandler
-		{
-			get
-			{
-				if (m_ReplaceColorHandler == null)
-					m_ReplaceColorHandler = new ReplaceColorHandler ();
-				return m_ReplaceColorHandler;
-			}
-		}
-
-		public ResizeHandler resizeHandler
-		{
-			get
-			{
-				if (m_ResizeHandler == null)
-					m_ResizeHandler = new ResizeHandler (sprite.textureRect.size);
-				return m_ResizeHandler;
-			}
-		}
-
-		public CreateSpriteHandler createSpriteHandler
-		{
-			get
-			{
-				if (m_CreateSpriteHandler == null)
-					m_CreateSpriteHandler = new CreateSpriteHandler();;
-				return m_CreateSpriteHandler;
 			}
 		}
 
@@ -247,19 +182,19 @@ namespace RagePixel2
 
 		public void ApplyColorReplace ()
 		{
-			replaceColorHandler.Apply (sprite);
+			GetModeHandler<ReplaceColorHandler>().Apply (sprite);
 			paintColor = replaceTargetColor;
 			mode = RagePixelState.SceneMode.Paint;
 		}
 
 		private void OnExitColorReplacerMode ()
 		{
-			replaceColorHandler.Cancel (sprite, paintColor);
+			GetModeHandler<ReplaceColorHandler>().Cancel (sprite, paintColor);
 		}
 
 		private void OnEnterColorReplacerMode ()
 		{
-			replaceColorHandler.SaveSnapshot (sprite);
+			GetModeHandler<ReplaceColorHandler>().SaveSnapshot (sprite);
 			replaceTargetColor = paintColor;
 		}
 
@@ -293,9 +228,9 @@ namespace RagePixel2
 			UpdateCursor ();
 
 			if (handler.AllowRightMouseButtonDefaultBehaviour ())
-				TriggerModeEventHandler (rightMouseButtonHandler);
+				TriggerModeEventHandler (GetModeHandler<RightMouseButtonHandler>());
 
-			if (!rightMouseButtonHandler.active)
+			if (!GetModeHandler<RightMouseButtonHandler>().active)
 				TriggerModeEventHandler (handler);
 		}
 
@@ -356,24 +291,36 @@ namespace RagePixel2
 				case SceneMode.Default:
 					break;
 				case SceneMode.Paint:
-					handler = paintHandler;
+					handler = GetModeHandler<PaintHandler>();
 					break;
 				case SceneMode.FloodFill:
-					handler = floodFillHandler;
+					handler = GetModeHandler<FloodFillHandler>();
 					break;
 				case SceneMode.ReplaceColor:
-					handler = replaceColorHandler;
+					handler = GetModeHandler<ReplaceColorHandler>();
 					break;
 				case SceneMode.Resize:
-					handler = resizeHandler;
+					handler = GetModeHandler<ResizeHandler>();
 					break;
 				case SceneMode.CreateSprite:
-					handler = createSpriteHandler;
+					handler = GetModeHandler<CreateSpriteHandler>();
 					break;
 			}
 			return handler;
 		}
-		
+
+		private T GetModeHandler<T> () where T : new ()
+		{
+			if (modeHandlerCache == null)
+				modeHandlerCache = new Hashtable ();
+			else if (modeHandlerCache.ContainsKey (typeof (T)))
+				return (T)modeHandlerCache[typeof (T)];
+
+			T newInstance = new T ();
+			modeHandlerCache.Add (typeof(T), newInstance);
+			return newInstance;
+		}
+
 		public enum SceneMode
 		{
 			Default = 0,

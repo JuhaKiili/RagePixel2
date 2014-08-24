@@ -10,17 +10,15 @@ namespace RagePixel2
 {
 	public class ResizeHandler : IRagePixelMode
 	{
+		private bool m_Initialized;
 		private const float k_MinSize = 2f;
 		private const float k_MaxSize = 2048f;
 		private Vector2 m_Size;
-
-		public ResizeHandler (Vector2 spriteSize)
-		{
-			m_Size = spriteSize;
-		}
-
+		
 		public void OnSceneGUI (RagePixelState state)
 		{
+			Initialize (state);
+
 			Vector2 uvPos = Utility.PixelToUV (m_Size, state.sprite, false);
 			Vector3 localPos = Utility.UVToLocal (uvPos, state.sprite, false);
 			Vector3 worldPos = Utility.LocalToWorld (localPos, state.transform);
@@ -34,6 +32,15 @@ namespace RagePixel2
 				m_Size = Utility.UVToPixel (uvPos, state.sprite, false);
 				m_Size = new Vector2((int)Mathf.Clamp (m_Size.x, k_MinSize, k_MaxSize), (int)Mathf.Clamp (m_Size.y, k_MinSize, k_MaxSize));
 				state.Repaint ();
+			}
+		}
+
+		private void Initialize (RagePixelState state)
+		{
+			if (!m_Initialized)
+			{
+				m_Initialized = true;
+				m_Size = state.sprite.textureRect.size;
 			}
 		}
 
