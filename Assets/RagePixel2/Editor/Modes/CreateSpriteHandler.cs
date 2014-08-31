@@ -121,6 +121,7 @@ namespace RagePixel2
 			gameObject.GetComponent<SpriteRenderer> ().sprite = sprite;
 			gameObject.GetComponent<SpriteRenderer> ().sharedMaterial = Resources.defaultMaterial;
 			Selection.activeGameObject = gameObject;
+			SceneView.lastActiveSceneView.Focus();
 		}
 
 		private bool dragFromLeftToRight
