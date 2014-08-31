@@ -31,7 +31,7 @@ namespace RagePixel2
 
 			if (!Utility.PixelInBounds (pixel, state.sprite))
 			{
-				state.paintColor = new Color(0f,0f,0f,0f);
+				state.paintColor = new Color (0f, 0f, 0f, 0f);
 				Event.current.Use ();
 				state.Repaint ();
 				return;

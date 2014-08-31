@@ -578,10 +578,10 @@ namespace RagePixel2
 			for (int i = 1; i < colors.Length - 1; i++)
 				colors[i] = defaultColor;
 
-			colors[0] = new Color32 (128, 128, 128, 0);
-			colors[sizeX - 1] = new Color32 (128, 128, 128, 0);
-			colors[colors.Length - sizeX] = new Color32 (128, 128, 128, 0);
-			colors[colors.Length - 1] = new Color32 (128, 128, 128, 0);
+			colors[0] = new Color32 (0, 0, 0, 0);
+			colors[sizeX - 1] = new Color32 (0, 0, 0, 0);
+			colors[colors.Length - sizeX] = new Color32 (0, 0, 0, 0);
+			colors[colors.Length - 1] = new Color32 (0, 0, 0, 0);
 
 			t.SetPixels32 (colors);
 			return t;
