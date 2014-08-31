@@ -16,6 +16,8 @@ namespace RagePixel2
 				m_State = CreateInstance<RagePixelState> ();
 
 			m_State.Repaint += this.Repaint;
+			minSize = new Vector2(k_ButtonSize * 3f + 14f, k_ButtonSize * 4f + 22f);
+			maxSize = new Vector2(k_ButtonSize * 3f + 14f, k_ButtonSize * 4f + 22f);
 		}
 
 		public void OnDisable ()
