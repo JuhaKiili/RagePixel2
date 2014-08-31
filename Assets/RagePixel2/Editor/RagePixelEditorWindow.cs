@@ -28,6 +28,8 @@ namespace RagePixel2
 
 		public void OnGUI ()
 		{
+			EditorGUI.BeginDisabledGroup (m_State.mode == RagePixelState.SceneMode.ReplaceColor);
+			
 			GUILayout.BeginHorizontal ();
 			DefaultOnGUI ();
 			CreateSpriteOnGUI();
@@ -53,24 +55,32 @@ namespace RagePixel2
 			ResizeOnGUI ();
 			GUILayout.EndHorizontal ();
 			EditorGUI.EndDisabledGroup ();
+
+			EditorGUI.EndDisabledGroup ();
 		}
 
 		public void PaintColorOnGUI ()
 		{
-			m_State.paintColor = Utility.PaintColorField (m_State.paintColor, k_ButtonSize, k_ButtonSize);
 			if (m_State.mode == RagePixelState.SceneMode.ReplaceColor)
 			{
-				m_State.replaceTargetColor = Utility.PaintColorField (m_State.replaceTargetColor, k_ButtonSize, k_ButtonSize);
-				if (GUILayout.Button (Resources.apply, GUILayout.Width (k_ButtonSize), GUILayout.Height ((k_ButtonSize))))
-					m_State.ApplyColorReplace ();
+				GUI.enabled = true;
+				PaintColorReplaceModeOnGUI ();
+				GUI.enabled = false;
 			}
 			else
 			{
+				m_State.paintColor = Utility.PaintColorField (m_State.paintColor, k_ButtonSize, k_ButtonSize);
 				BasicModeButton (RagePixelState.SceneMode.ReplaceColor, Resources.arrowRight);
-				EditorGUI.BeginDisabledGroup(true);
-				GUILayout.Button (Resources.apply, GUILayout.Width (k_ButtonSize), GUILayout.Height ((k_ButtonSize)));
-				EditorGUI.EndDisabledGroup();
 			}
+		}
+
+		private void PaintColorReplaceModeOnGUI ()
+		{
+			m_State.replaceTargetColor = Utility.PaintColorField (m_State.replaceTargetColor, k_ButtonSize, k_ButtonSize);
+			if (GUILayout.Button (Resources.apply, GUILayout.Width (k_ButtonSize), GUILayout.Height (k_ButtonSize)))
+				m_State.ApplyColorReplace ();
+			if (GUILayout.Button (Resources.cancel, GUILayout.Width (k_ButtonSize), GUILayout.Height (k_ButtonSize)))
+				m_State.mode = RagePixelState.SceneMode.Paint;
 		}
 
 		public void CreateSpriteOnGUI ()

@@ -370,6 +370,20 @@ namespace RagePixel2
 			return (Color)returnValue;
 		}
 
+		public static void ShowColorPicker (Color color)
+		{
+			//public static void Show (GUIView viewToUpdate, Color col)
+			object[] parameters = new object[2];
+			parameters[0] = Reflection.GetEditorStatic ("GUIView", "current");
+			parameters[1] = color;
+
+			Type[] types = new Type[2];
+			types[0] = Reflection.GetEditorType("GUIView");
+			types[1] = typeof (Color);
+
+			Reflection.InvokeEditorStatic ("ColorPicker", "Show", parameters, types);
+		}
+
 		// http://ericw.ca/notes/bresenhams-line-algorithm-in-csharp.html
 		private static IEnumerable<Vector2> GetPointsOnLine (int x0, int y0, int x1, int y1)
 		{

@@ -206,6 +206,7 @@ namespace RagePixel2
 		{
 			GetModeHandler<ReplaceColorHandler>().SaveSnapshot (sprite);
 			replaceTargetColor = paintColor;
+			Utility.ShowColorPicker(replaceTargetColor);
 		}
 
 		private void UpdateToolsCurrent (SceneMode oldMode, SceneMode newMode)
