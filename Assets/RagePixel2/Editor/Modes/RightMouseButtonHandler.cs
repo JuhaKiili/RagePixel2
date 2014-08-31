@@ -30,7 +30,12 @@ namespace RagePixel2
 			Vector2 pixel = GetMousePixel (state, false);
 
 			if (!Utility.PixelInBounds (pixel, state.sprite))
+			{
+				state.paintColor = new Color(0f,0f,0f,0f);
+				Event.current.Use ();
+				state.Repaint ();
 				return;
+			}
 
 			Color newColor = state.sprite.texture.GetPixel ((int)pixel.x, (int)pixel.y);
 
