@@ -112,19 +112,6 @@ namespace RagePixel2
 			GetWindow (typeof (RagePixelEditorWindow));
 		}
 
-		[MenuItem ("GameObject/Create Other/RagePixel Sprite")]
-		public static void CreateSpriteMenuItem ()
-		{
-			GameObject gameObject = new GameObject ();
-			gameObject.name = "New Sprite";
-			gameObject.AddComponent<SpriteRenderer> ();
-			gameObject.transform.position = Utility.GetSceneViewCenter ();
-			gameObject.GetComponent<SpriteRenderer> ().sprite = Utility.CreateNewSprite (32, 32);
-			gameObject.GetComponent<SpriteRenderer> ().sharedMaterial = Resources.defaultMaterial;
-			Selection.activeGameObject = gameObject;
-			SceneView.FrameLastActiveSceneView ();
-		}
-
 		private const float k_ButtonSize = 32f;
 		const float k_VerticalSpaceBetweenButtons = 2f;
 	}
