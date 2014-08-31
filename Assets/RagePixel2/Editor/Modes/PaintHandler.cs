@@ -7,6 +7,8 @@ namespace RagePixel2
 	{
 		private Vector2? m_LastMousePixel;
 
+		private bool activeDrag { get { return m_LastMousePixel != null; } }
+
 		public void OnSceneGUI (RagePixelState state)
 		{
 			return;
@@ -17,7 +19,10 @@ namespace RagePixel2
 			if (Event.current.button != 0)
 				return;
 
-			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition);
+			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition, false);
+
+			if (!Utility.PixelInBounds (pixel, state.sprite))
+				return;
 
 			Vector2 minPixel = new Vector2 ((int)(pixel.x - state.brush.m_SizeX * .5f + .5f), (int)(pixel.y - state.brush.m_SizeY * .5f + .5f));
 			
@@ -40,15 +45,11 @@ namespace RagePixel2
 
 		public void OnMouseDrag (RagePixelState state)
 		{
-			if (Event.current.button != 0)
+			if (Event.current.button != 0 || !activeDrag)
 				return;
 
 			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition);
-			if (m_LastMousePixel != null)
-			{
-				Utility.DrawPixelLine (state.sprite.texture, state.paintColor, (int)m_LastMousePixel.Value.x,
-					(int)m_LastMousePixel.Value.y, (int)pixel.x, (int)pixel.y);
-			}
+			Utility.DrawPixelLine (state.sprite.texture, state.paintColor, (int)m_LastMousePixel.Value.x, (int)m_LastMousePixel.Value.y, (int)pixel.x, (int)pixel.y);
 			m_LastMousePixel = pixel;
 		}
 
@@ -59,7 +60,7 @@ namespace RagePixel2
 
 		public void OnRepaint (RagePixelState state)
 		{
-			state.DrawBasicPaintGizmo ();
+			state.DrawBasicPaintGizmo (activeDrag);
 		}
 
 		public bool AllowRightMouseButtonDefaultBehaviour ()

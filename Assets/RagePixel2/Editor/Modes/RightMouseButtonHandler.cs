@@ -27,7 +27,11 @@ namespace RagePixel2
 			if (Event.current.button == 0 || active)
 				return;
 
-			Vector2 pixel = GetMousePixel (state);
+			Vector2 pixel = GetMousePixel (state, false);
+
+			if (!Utility.PixelInBounds (pixel, state.sprite))
+				return;
+
 			Color newColor = state.sprite.texture.GetPixel ((int)pixel.x, (int)pixel.y);
 
 			if (state.mode == RagePixelState.SceneMode.ReplaceColor)
@@ -61,7 +65,7 @@ namespace RagePixel2
 			if (Event.current.button == 0 || !active)
 				return;
 
-			m_MarqueeEnd = GetMousePixel (state);
+			m_MarqueeEnd = GetMousePixel (state, true);
 			Event.current.Use();
 		}
 
@@ -88,9 +92,9 @@ namespace RagePixel2
 			return false;
 		}
 		
-		private Vector2 GetMousePixel (RagePixelState state)
+		private Vector2 GetMousePixel (RagePixelState state, bool clamp)
 		{
-			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition);
+			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition, clamp);
 			return new Vector2((int)pixel.x, (int)pixel.y);
 		}
 	}

@@ -161,6 +161,20 @@ namespace RagePixel2
 		{
 			return ScreenToPixel (screenPosition, transform, sprite, true);
 		}
+
+		public static Vector2 ScreenToUV (Vector2 screenPosition, Transform transform, Sprite sprite)
+		{
+			Vector3 localPosition = Utility.ScreenToLocal (screenPosition, transform);
+			Vector2 uvPosition = Utility.LocalToUV (localPosition, sprite, true);
+			return uvPosition;
+		}
+
+		public static Vector2 ScreenToUV (Vector2 screenPosition, Transform transform, Sprite sprite, bool clamp)
+		{
+			Vector3 localPosition = Utility.ScreenToLocal (screenPosition, transform);
+			Vector2 uvPosition = Utility.LocalToUV (localPosition, sprite, clamp);
+			return uvPosition;
+		}
 			
 		public static Vector2 ScreenToPixel (Vector2 screenPosition, Transform transform, Sprite sprite, bool clamp)
 		{
@@ -225,9 +239,17 @@ namespace RagePixel2
 			return worldPosition;
 		}
 
-		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Brush brush, Transform transform, Sprite sprite)
+		public static bool PixelInBounds (Vector2 pixelPosition, Sprite sprite)
 		{
-			Vector2 pixel = ScreenToPixel (screenPosition, transform, sprite);
+			return (pixelPosition.x < sprite.rect.width && pixelPosition.y < sprite.rect.height && pixelPosition.x >= 0f && pixelPosition.y >= 0f);
+		}
+
+		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Brush brush, Transform transform, Sprite sprite, bool clamp)
+		{
+			Vector2 pixel = ScreenToPixel (screenPosition, transform, sprite, clamp);
+
+			if (!clamp && !PixelInBounds (pixel, sprite))
+				return;
 
 			Vector2 minPixel = new Vector2 ((int)(pixel.x - brush.m_SizeX * .5f + .5f), (int)(pixel.y - brush.m_SizeY * .5f + .5f));
 			Vector2 maxPixel = new Vector2 ((int)(pixel.x + brush.m_SizeX * .5f + .5f), (int)(pixel.y + brush.m_SizeY * .5f + .5f));

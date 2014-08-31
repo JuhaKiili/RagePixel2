@@ -15,7 +15,7 @@ namespace RagePixel2
 		{
 			if (Event.current.button == 0)
 			{
-				Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition);
+				Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition, false);
 				Color oldColor = state.sprite.texture.GetPixel ((int)pixel.x, (int)pixel.y);
 				Texture2D texture = state.sprite.texture;
 				Rect spriteRect = state.sprite.textureRect;
