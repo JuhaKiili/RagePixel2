@@ -133,6 +133,11 @@ namespace RagePixel2
 			Utility.DrawPaintGizmo (Event.current.mousePosition, color, shadowColor, brush, transform, sprite, clamp);
 		}
 
+		public void DrawSpriteBounds ()
+		{
+			Utility.DrawSpriteBounds (new Color (1f, 1f, 1f, 0.4f), new Color (0f, 0f, 0f, 0.4f), transform, sprite);
+		}
+
 		public Vector2 ScreenToPixel (Vector2 screenPosition)
 		{
 			return ScreenToPixel(screenPosition, true);

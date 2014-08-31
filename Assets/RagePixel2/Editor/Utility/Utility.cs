@@ -287,6 +287,31 @@ namespace RagePixel2
 			Handles.EndGUI ();
 		}
 
+		public static void DrawSpriteBounds (Color color, Color shadowColor, Transform transform, Sprite sprite)
+		{
+			Vector2 minPixel = new Vector2 (0, 0);
+			Vector2 maxPixel = new Vector2 (sprite.rect.width, sprite.rect.height);
+
+			Vector3[] screenPolyLine = new Vector3[5];
+			screenPolyLine[0] = PixelToScreen (new Vector2 (minPixel.x, minPixel.y), transform, sprite);
+			screenPolyLine[1] = PixelToScreen (new Vector2 (maxPixel.x, minPixel.y), transform, sprite);
+			screenPolyLine[2] = PixelToScreen (new Vector2 (maxPixel.x, maxPixel.y), transform, sprite);
+			screenPolyLine[3] = PixelToScreen (new Vector2 (minPixel.x, maxPixel.y), transform, sprite);
+			screenPolyLine[4] = screenPolyLine[0];
+
+			Vector3[] shadowPolyLine = new Vector3[5];
+			for (int i = 0; i < screenPolyLine.Length; i++)
+				shadowPolyLine[i] = screenPolyLine[i] + new Vector3 (1f, 1f, 0f);
+
+			Handles.BeginGUI ();
+			Handles.color = shadowColor;
+			Handles.DrawPolyLine (shadowPolyLine);
+			Handles.color = color;
+			Handles.DrawPolyLine (screenPolyLine);
+
+			Handles.EndGUI ();
+		}
+
 		public static void DrawRectangle (Vector3 worldPosition1, Vector3 worldPosition2, Color color)
 		{
 			Vector3[] polyLine = new Vector3[5];

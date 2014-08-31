@@ -48,6 +48,7 @@ namespace RagePixel2
 		public void OnRepaint (RagePixelState state)
 		{
 			state.DrawBasicPaintGizmo ();
+			state.DrawSpriteBounds ();
 		}
 
 		public bool AllowRightMouseButtonDefaultBehaviour ()

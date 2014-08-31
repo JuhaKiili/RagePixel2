@@ -78,6 +78,8 @@ namespace RagePixel2
 		{
 			if (!active)
 				return;
+			
+			state.DrawSpriteBounds ();
 
 			Rect r = Utility.GetPixelMarqueeRect ((Vector2)m_MarqueeStart, (Vector2)m_MarqueeEnd);
 			Utility.DrawRectangle (
