@@ -559,10 +559,13 @@ namespace RagePixel2
 			textureImporter.npotScale = TextureImporterNPOTScale.None;
 			textureImporter.filterMode = FilterMode.Point;
 			textureImporter.isReadable = true;
+			textureImporter.wrapMode = TextureWrapMode.Clamp;
+			textureImporter.mipmapEnabled = false;
 
 			TextureImporterSettings settings = new TextureImporterSettings ();
 			textureImporter.ReadTextureSettings (settings);
 			settings.spriteMeshType = SpriteMeshType.FullRect;
+			settings.spriteAlignment = (int)SpriteAlignment.Center;
 			textureImporter.SetTextureSettings (settings);
 		}
 
