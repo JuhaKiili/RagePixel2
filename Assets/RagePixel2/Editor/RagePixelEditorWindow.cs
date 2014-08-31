@@ -59,12 +59,15 @@ namespace RagePixel2
 			if (m_State.mode == RagePixelState.SceneMode.ReplaceColor)
 			{
 				m_State.replaceTargetColor = Utility.PaintColorField (m_State.replaceTargetColor, k_ButtonSize, k_ButtonSize);
-				if (GUILayout.Button ("OK", GUILayout.Width (k_ButtonSize), GUILayout.Height ((k_ButtonSize))))
+				if (GUILayout.Button (Resources.apply, GUILayout.Width (k_ButtonSize), GUILayout.Height ((k_ButtonSize))))
 					m_State.ApplyColorReplace ();
 			}
 			else
 			{
 				BasicModeButton (RagePixelState.SceneMode.ReplaceColor, Resources.arrowRight);
+				EditorGUI.BeginDisabledGroup(true);
+				GUILayout.Button (Resources.apply, GUILayout.Width (k_ButtonSize), GUILayout.Height ((k_ButtonSize)));
+				EditorGUI.EndDisabledGroup();
 			}
 		}
 

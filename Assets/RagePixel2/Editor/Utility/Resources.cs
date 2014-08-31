@@ -13,6 +13,7 @@ namespace RagePixel2
 		private const string s_MarqueeBase64 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANUlEQVQ4EWNgoBT8/fPnP8gMcmlK7UfYTKpJMBeTqg9TPbkmkatv1AWYITCaDkBhAktR5NIAtaFusfCIq4AAAAAASUVORK5CYII=";
 		private const string s_AnimationBase64 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAqUlEQVQ4EZ1S2xHDIAwLuSzGCCzCaoxII3LiZMe0SfWDLGzZPNLmUGvtTnoXvjFA7kH71trsnHOenPt+LaUkaNMAAUXwb9BmRz/BZOXU/JpOqDYm8KImKI8a7JrwDzd3AAPf5dd0ZgIWowiIDP2UxsBvPolvR3jSVY3DCa4D2OfSIvD5Y3luiOAAOHBFNoZuPhIEghe3iqFr8cjTjixcrVHuuMRoY2Xi9Q8An1kMaDUJnAAAAABJRU5ErkJggg==";
 		private const string s_CreateSpriteBase64 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAVElEQVQ4EWNgoBAwgvQ3NDT8p8gccg0A6WOiyGagZtob8B8I8LmS9i7AZztIjgWbAnRnI/MZgQBZD1YDkBWBNCPzkTWD2AMfBgRdgM/5g8MLFOdGAMuzGhu8eNEwAAAAAElFTkSuQmCC";
+		private const string s_ApplyBase64 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAUElEQVQ4EWNgGAVkhUBDQ8N/sjSCNP2HArIMoK1mkL9AAJvTiLYZWSHQQLBZyGLYDMcQQ9aAzMZQCBVgxCYB0ggTZwQCGJskGtkQkjQOPcUAPEJSOGwU6bkAAAAASUVORK5CYII=";
 
 		private static Texture2D s_Arrow;
 
@@ -115,6 +116,19 @@ namespace RagePixel2
 					s_CreateSprite = Base64ToTexture (s_CreateSpriteBase64);
 
 				return s_CreateSprite;
+			}
+		}
+
+		private static Texture2D s_Apply;
+
+		public static Texture2D apply
+		{
+			get
+			{
+				if (s_Apply == null)
+					s_Apply = Base64ToTexture (s_ApplyBase64);
+
+				return s_Apply;
 			}
 		}
 
