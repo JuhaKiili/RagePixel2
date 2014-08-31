@@ -70,7 +70,7 @@ namespace RagePixel2
 
 		public void CreateSpriteOnGUI ()
 		{
-			BasicModeButton (RagePixelState.SceneMode.CreateSprite, Resources.arrow);
+			BasicModeButton (RagePixelState.SceneMode.CreateSprite, Resources.createSprite);
 		}
 
 		public void DefaultOnGUI ()
