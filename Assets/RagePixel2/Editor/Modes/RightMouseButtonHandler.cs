@@ -11,10 +11,16 @@ namespace RagePixel2
 	{
 		private Vector2? m_MarqueeStart = null;
 		private Vector2? m_MarqueeEnd = null;
+		private Vector2? m_PixelCenterOffset = null;
 
 		public bool active
 		{
 			get { return m_MarqueeStart != null && m_MarqueeEnd != null; }
+		}
+
+		public Rect rect
+		{
+			get { return Utility.GetPixelMarqueeRect ((Vector2)m_MarqueeStart - (Vector2)m_PixelCenterOffset, (Vector2)m_MarqueeEnd - (Vector2)m_PixelCenterOffset); }
 		}
 
 		public void OnSceneGUI (RagePixelState state)
@@ -27,9 +33,9 @@ namespace RagePixel2
 			if (Event.current.button == 0 || active)
 				return;
 
-			Vector2 pixel = GetMousePixel (state, false);
-
-			if (!Utility.PixelInBounds (pixel, state.sprite))
+			Vector2 mouse = GetMousePixel (state, false);
+			
+			if (!Utility.PixelInBounds (mouse, state.sprite))
 			{
 				state.paintColor = new Color (0f, 0f, 0f, 0f);
 				Event.current.Use ();
@@ -37,7 +43,7 @@ namespace RagePixel2
 				return;
 			}
 
-			Color newColor = state.sprite.texture.GetPixel ((int)pixel.x, (int)pixel.y);
+			Color newColor = state.sprite.texture.GetPixel ((int)mouse.x, (int)mouse.y);
 
 			if (state.mode == RagePixelState.SceneMode.ReplaceColor)
 				state.replaceTargetColor = newColor;
@@ -45,8 +51,9 @@ namespace RagePixel2
 				state.paintColor = newColor;
 
 			Event.current.Use ();
-			m_MarqueeStart = pixel;
-			m_MarqueeEnd = pixel;
+			m_MarqueeStart = mouse;
+			m_MarqueeEnd = mouse;
+			m_PixelCenterOffset = GetPixelCenterOffset (mouse);
 			state.Repaint ();
 		}
 
@@ -55,12 +62,13 @@ namespace RagePixel2
 			if (Event.current.button == 0 || !active)
 				return;
 
-			Rect r = Utility.GetPixelMarqueeRect ((Vector2)m_MarqueeStart, (Vector2)m_MarqueeEnd);
+			Rect r = rect;
 			r.height += 1;
 			r.width += 1;
 			state.brush = new Brush(state.sprite.texture, r);
 			m_MarqueeStart = null;
 			m_MarqueeEnd = null;
+			m_PixelCenterOffset = null;
 			Event.current.Use ();
 			state.Repaint ();
 		}
@@ -86,7 +94,7 @@ namespace RagePixel2
 			
 			state.DrawSpriteBounds ();
 
-			Rect r = Utility.GetPixelMarqueeRect ((Vector2)m_MarqueeStart, (Vector2)m_MarqueeEnd);
+			Rect r = rect;
 			Utility.DrawRectangle (
 				Utility.PixelToWorld (new Vector2(r.xMin, r.yMin), state.transform, state.sprite, false),
 				Utility.PixelToWorld (new Vector2(r.xMax + 1, r.yMax + 1), state.transform, state.sprite, false), 
@@ -101,8 +109,12 @@ namespace RagePixel2
 		
 		private Vector2 GetMousePixel (RagePixelState state, bool clamp)
 		{
-			Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition, clamp);
-			return new Vector2((int)pixel.x, (int)pixel.y);
+			return state.ScreenToPixel (Event.current.mousePosition, clamp);
+		}
+
+		private Vector2 GetPixelCenterOffset (Vector2 pos)
+		{
+			return new Vector2(pos.x - .5f - Mathf.Round (pos.x - .5f), pos.y - .5f - Mathf.Round (pos.y - .5f));
 		}
 	}
 }
