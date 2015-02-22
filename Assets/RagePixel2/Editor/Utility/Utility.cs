@@ -332,7 +332,6 @@ namespace RagePixel2
 
 		public static void DrawPixelLine (Texture2D texture, Brush brush, IntVector2 p1, IntVector2 p2)
 		{
-			Debug.Log("p1 " + p1 + ", p2 " + p2);
 			foreach (IntVector2 pixel in GetPointsOnLine(p1.x, p1.y, p2.x, p2.y))
 				SetPixelsClamped (texture, pixel - brush.m_BrushPivot, brush.m_Size, brush.m_Colors);
 			texture.Apply ();
@@ -340,7 +339,6 @@ namespace RagePixel2
 
 		public static void SetPixelsClamped(Texture2D texture, IntVector2 position, IntVector2 size, Color[] colors)
 		{
-			Debug.Log(position);
 			IntVector2 min = new IntVector2(
 				Math.Max (Math.Min (position.x, texture.width - 1), 0),
 				Math.Max (Math.Min (position.y, texture.height - 1), 0)
@@ -418,7 +416,7 @@ namespace RagePixel2
 				x0 = y0;
 				y0 = t;
 				t = x1; // swap x1 and y1
-				x1 = y1;
+				x1 = y1; 
 				y1 = t;
 			}
 			if (x0 > x1)
