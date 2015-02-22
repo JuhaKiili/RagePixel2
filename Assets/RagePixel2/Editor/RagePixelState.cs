@@ -124,19 +124,14 @@ namespace RagePixel2
 
 		public void DrawBasicPaintGizmo ()
 		{
-			DrawBasicPaintGizmo (false);
-		}
-
-		public void DrawBasicPaintGizmo (bool clamp)
-		{
-			Color color = m_MouseIsDown ? Color.white : new Color (1f, 1f, 1f, 0.4f);
-			Color shadowColor = m_MouseIsDown ? Color.black : new Color (0f, 0f, 0f, 0.4f);
-			Utility.DrawPaintGizmo (Event.current.mousePosition, color, shadowColor, brush, transform, sprite, clamp);
+			Color color = m_MouseIsDown ? Color.white : new Color (0.8f, 0.8f, 0.8f, 1f);
+			Color shadowColor = m_MouseIsDown ? Color.black : new Color (0.1f, 0.1f, 0.1f, 1f);
+			Utility.DrawPaintGizmo (Event.current.mousePosition, color, shadowColor, brush, transform, sprite);
 		}
 
 		public void DrawSpriteBounds ()
 		{
-			Utility.DrawSpriteBounds (new Color (1f, 1f, 1f, 0.4f), new Color (0f, 0f, 0f, 0.4f), transform, sprite);
+			Utility.DrawSpriteBounds(new Color(0.8f, 0.8f, 0.8f, 1f), new Color(0.1f, 0.1f, 0.1f, 1f), transform, sprite);
 		}
 
 		public IntVector2 ScreenToPixel (Vector2 screenPosition)

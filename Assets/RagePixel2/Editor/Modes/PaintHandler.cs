@@ -61,7 +61,7 @@ namespace RagePixel2
 
 		public void OnRepaint (RagePixelState state)
 		{
-			state.DrawBasicPaintGizmo (activeDrag);
+			state.DrawBasicPaintGizmo ();
 			state.DrawSpriteBounds ();
 		}
 

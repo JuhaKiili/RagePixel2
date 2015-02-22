@@ -245,31 +245,25 @@ namespace RagePixel2
 			return (pixelPosition.x < sprite.rect.width && pixelPosition.y < sprite.rect.height && pixelPosition.x >= 0f && pixelPosition.y >= 0f);
 		}
 
-		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Brush brush, Transform transform, Sprite sprite, bool clamp)
+		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Brush brush, Transform transform, Sprite sprite)
 		{
-			IntVector2 pixel = ScreenToPixel(screenPosition, transform, sprite, clamp);
-
-			if (!clamp && !PixelInBounds (pixel, sprite))
-				return;
+			IntVector2 pixel = ScreenToPixel(screenPosition, transform, sprite, false);
 
 			IntVector2 minPixel = pixel - brush.m_BrushPivot;
 			IntVector2 maxPixel = pixel + brush.m_Size - brush.m_BrushPivot;
 
 			Vector3[] screenPolyLine = new Vector3[5];
-			screenPolyLine[0] = PixelToScreen(new IntVector2(minPixel.x, minPixel.y), transform,
-				sprite);
-			screenPolyLine[1] = PixelToScreen(new IntVector2(maxPixel.x, minPixel.y),
-				transform, sprite);
-			screenPolyLine[2] = PixelToScreen(new IntVector2(maxPixel.x, maxPixel.y),
-				transform, sprite);
-			screenPolyLine[3] = PixelToScreen(new IntVector2(minPixel.x, maxPixel.y),
-				transform, sprite);
+			screenPolyLine[0] = PixelToScreen(new IntVector2(minPixel.x, minPixel.y), transform, sprite, false) + new Vector2(1f, -3f);
+			screenPolyLine[1] = PixelToScreen(new IntVector2(maxPixel.x, minPixel.y), transform, sprite, false) + new Vector2(2f, -3f);
+			screenPolyLine[2] = PixelToScreen(new IntVector2(maxPixel.x, maxPixel.y), transform, sprite, false) + new Vector2(2f, -2f);
+			screenPolyLine[3] = PixelToScreen(new IntVector2(minPixel.x, maxPixel.y), transform, sprite, false) + new Vector2(1f, -2f);
 			screenPolyLine[4] = screenPolyLine[0];
 
 			Vector3[] shadowPolyLine = new Vector3[5];
 			for (int i = 0; i < screenPolyLine.Length; i++)
 				shadowPolyLine[i] = screenPolyLine[i] + new Vector3 (1f, 1f, 0f);
 
+			GUI.color = new Color(1f,1f,1f,0.66f);
 			Handles.BeginGUI ();
 			GUI.DrawTexture (
 				new Rect(
@@ -294,10 +288,10 @@ namespace RagePixel2
 			IntVector2 maxPixel = new IntVector2(sprite.rect.width, sprite.rect.height);
 
 			Vector3[] screenPolyLine = new Vector3[5];
-			screenPolyLine[0] = PixelToScreen(new IntVector2(minPixel.x, minPixel.y), transform, sprite);
-			screenPolyLine[1] = PixelToScreen(new IntVector2(maxPixel.x, minPixel.y), transform, sprite);
-			screenPolyLine[2] = PixelToScreen(new IntVector2(maxPixel.x, maxPixel.y), transform, sprite);
-			screenPolyLine[3] = PixelToScreen(new IntVector2(minPixel.x, maxPixel.y), transform, sprite);
+			screenPolyLine[0] = PixelToScreen(new IntVector2(minPixel.x, minPixel.y), transform, sprite) + new Vector2(1f, -3f);
+			screenPolyLine[1] = PixelToScreen(new IntVector2(maxPixel.x, minPixel.y), transform, sprite) + new Vector2(2f, -3f);
+			screenPolyLine[2] = PixelToScreen(new IntVector2(maxPixel.x, maxPixel.y), transform, sprite) + new Vector2(2f, -2f);
+			screenPolyLine[3] = PixelToScreen(new IntVector2(minPixel.x, maxPixel.y), transform, sprite) + new Vector2(1f, -2f);
 			screenPolyLine[4] = screenPolyLine[0];
 
 			Vector3[] shadowPolyLine = new Vector3[5];
