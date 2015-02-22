@@ -21,14 +21,11 @@ namespace RagePixel2
 				return;
 
 			IntVector2 pixel = state.ScreenToPixel(Event.current.mousePosition, false);
-
-			if (!Utility.PixelInBounds (pixel, state.sprite))
-				return;
-
 			IntVector2 minPixel = pixel - state.brush.m_BrushPivot;
 
-			state.sprite.texture.SetPixels(minPixel.x, minPixel.y, state.brush.m_Size.x, state.brush.m_Size.y, state.brush.m_Colors);
+			Utility.SetPixelsClamped (state.sprite.texture, minPixel, state.brush.m_Size, state.brush.m_Colors);
 			state.sprite.texture.Apply ();
+			
 			m_LastMousePixel = pixel;
 			state.Repaint ();
 			Event.current.Use ();
@@ -49,7 +46,7 @@ namespace RagePixel2
 			if (Event.current.button != 0 || !activeDrag)
 				return;
 
-			IntVector2 pixel = state.ScreenToPixel(Event.current.mousePosition);
+			IntVector2 pixel = state.ScreenToPixel(Event.current.mousePosition, false);
 			Utility.DrawPixelLine (state.sprite.texture, state.brush, m_LastMousePixel.Value, pixel);
 			m_LastMousePixel = pixel;
 		}

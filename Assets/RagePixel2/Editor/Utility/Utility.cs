@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Assets.RagePixel2.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
@@ -329,11 +330,38 @@ namespace RagePixel2
 			Handles.DrawLine (point + Vector3.forward*size, point + Vector3.back*size);
 		}
 
-		public static void DrawPixelLine (Texture2D texture, Brush brush, IntVector2 min, IntVector2 max)
+		public static void DrawPixelLine (Texture2D texture, Brush brush, IntVector2 p1, IntVector2 p2)
 		{
-			foreach (IntVector2 pixel in GetPointsOnLine(min.x, min.y, max.x, max.y))
-				texture.SetPixels(pixel.x - brush.m_BrushPivot.x, pixel.y - brush.m_BrushPivot.y, brush.m_Size.x, brush.m_Size.y, brush.m_Colors);
+			Debug.Log("p1 " + p1 + ", p2 " + p2);
+			foreach (IntVector2 pixel in GetPointsOnLine(p1.x, p1.y, p2.x, p2.y))
+				SetPixelsClamped (texture, pixel - brush.m_BrushPivot, brush.m_Size, brush.m_Colors);
 			texture.Apply ();
+		}
+
+		public static void SetPixelsClamped(Texture2D texture, IntVector2 position, IntVector2 size, Color[] colors)
+		{
+			Debug.Log(position);
+			IntVector2 min = new IntVector2(
+				Math.Max (Math.Min (position.x, texture.width - 1), 0),
+				Math.Max (Math.Min (position.y, texture.height - 1), 0)
+				);
+			IntVector2 max = new IntVector2(
+				Math.Max(Math.Min(position.x + size.x - 1, texture.width - 1), 0),
+				Math.Max(Math.Min(position.y + size.y - 1, texture.height - 1), 0)
+				);
+
+			IntVector2 texturePos = min;
+			
+			int colorIndex = 0;
+			for (texturePos.y = position.y; texturePos.y < position.y + size.y; texturePos.y++)
+			{
+				for (texturePos.x = position.x; texturePos.x < position.x + size.x; texturePos.x++)
+				{
+					if (texturePos.x >= min.x && texturePos.x <= max.x && texturePos.y >= min.y && texturePos.y <= max.y)
+						texture.SetPixel(texturePos.x, texturePos.y, colors[colorIndex]);
+					colorIndex++;
+				}
+			}
 		}
 
 		public static Color PaintColorField (Color value, float width, float height)
