@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Assets.RagePixel2.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
@@ -13,7 +14,7 @@ namespace RagePixel2
 		private bool m_Initialized;
 		private const float k_MinSize = 2f;
 		private const float k_MaxSize = 2048f;
-		private Vector2 m_Size;
+		private IntVector2 m_Size;
 		
 		public void OnSceneGUI (RagePixelState state)
 		{
@@ -30,7 +31,7 @@ namespace RagePixel2
 				localPos = Utility.WorldToLocal (worldPos, state.transform);
 				uvPos = Utility.LocalToUV (localPos, state.sprite, false);
 				m_Size = Utility.UVToPixel (uvPos, state.sprite, false);
-				m_Size = new Vector2((int)Mathf.Clamp (m_Size.x, k_MinSize, k_MaxSize), (int)Mathf.Clamp (m_Size.y, k_MinSize, k_MaxSize));
+				m_Size = new IntVector2((int)Mathf.Clamp(m_Size.x, k_MinSize, k_MaxSize), (int)Mathf.Clamp(m_Size.y, k_MinSize, k_MaxSize));
 				state.Repaint ();
 			}
 		}
@@ -40,7 +41,7 @@ namespace RagePixel2
 			if (!m_Initialized)
 			{
 				m_Initialized = true;
-				m_Size = state.sprite.textureRect.size;
+				m_Size = new IntVector2(state.sprite.textureRect.size);
 			}
 		}
 
@@ -91,7 +92,7 @@ namespace RagePixel2
 			DrawSizeLabel (state);
 		}
 
-		public bool AllowRightMouseButtonDefaultBehaviour ()
+		public bool AllowPickingDefaultBehaviour ()
 		{
 			return false;
 		}
@@ -109,7 +110,7 @@ namespace RagePixel2
 		private void DrawGizmo (RagePixelState state)
 		{
 			Utility.DrawRectangle (
-				Utility.PixelToWorld (Vector2.zero, state.transform, state.sprite, false),
+				Utility.PixelToWorld(default(IntVector2), state.transform, state.sprite, false),
 				Utility.PixelToWorld (m_Size, state.transform, state.sprite, false), Color.white
 				);
 		}

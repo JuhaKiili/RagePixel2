@@ -8,6 +8,6 @@ namespace RagePixel2
 		void OnMouseDrag (RagePixelState state);
 		void OnMouseMove (RagePixelState state);
 		void OnRepaint (RagePixelState state);
-		bool AllowRightMouseButtonDefaultBehaviour ();
+		bool AllowPickingDefaultBehaviour ();
 	}
 }

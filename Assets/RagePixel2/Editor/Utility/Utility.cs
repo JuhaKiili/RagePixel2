@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Assets.RagePixel2.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -12,40 +13,40 @@ namespace RagePixel2
 		private const float k_DefaultPixelsToUnits = 100f;
 		private const float k_UVEpsilon = 0.00001f;
 
-		public static Vector2 UVToPixel (Vector2 uv, Sprite sprite)
+		public static IntVector2 UVToPixel(Vector2 uv, Sprite sprite)
 		{
 			return UVToPixel (uv, sprite, true);
 		}
 
-		public static Vector2 UVToPixel (Vector2 uv, Sprite sprite, bool clamp)
+		public static IntVector2 UVToPixel(Vector2 uv, Sprite sprite, bool clamp)
 		{
 			if (sprite == null)
-				return Vector2.zero;
+				return default(IntVector2);
 
 			Vector2 result = new Vector2(uv.x, uv.y);
 
 			if (clamp)
-				result = new Vector2 (
+				result = new Vector2(
 					Mathf.Max (Mathf.Min (result.x, 1.0f - k_UVEpsilon), 0f),
 					Mathf.Max (Mathf.Min (result.y, 1.0f - k_UVEpsilon), 0f)
 					);
 
-			result = new Vector2(result.x * sprite.texture.width, result.y * sprite.texture.height);
+			IntVector2 resultInt = new IntVector2(result.x * sprite.texture.width, result.y * sprite.texture.height);
 
-			return result;
+			return resultInt;
 		}
 
-		public static Vector2 PixelToUV (Vector2 pixel, Sprite sprite)
+		public static Vector2 PixelToUV (IntVector2 pixel, Sprite sprite)
 		{
 			return PixelToUV (pixel, sprite, true);
 		}
 
-		public static Vector2 PixelToUV (Vector2 pixel, Sprite sprite, bool clamp)
+		public static Vector2 PixelToUV(IntVector2 pixel, Sprite sprite, bool clamp)
 		{
 			if (sprite == null)
 				return Vector2.zero;
 
-			Vector2 result = new Vector2 (pixel.x / sprite.texture.width, pixel.y / sprite.texture.height);
+			Vector2 result = new Vector2((float)pixel.x / (float)sprite.texture.width, (float)pixel.y / (float)sprite.texture.height);
 
 			if (clamp)
 				result = new Vector2 (
@@ -157,7 +158,7 @@ namespace RagePixel2
 			return HandleUtility.WorldToGUIPoint (worldPosition);
 		}
 
-		public static Vector2 ScreenToPixel (Vector2 screenPosition, Transform transform, Sprite sprite)
+		public static IntVector2 ScreenToPixel(Vector2 screenPosition, Transform transform, Sprite sprite)
 		{
 			return ScreenToPixel (screenPosition, transform, sprite, true);
 		}
@@ -175,21 +176,21 @@ namespace RagePixel2
 			Vector2 uvPosition = Utility.LocalToUV (localPosition, sprite, clamp);
 			return uvPosition;
 		}
-			
-		public static Vector2 ScreenToPixel (Vector2 screenPosition, Transform transform, Sprite sprite, bool clamp)
+
+		public static IntVector2 ScreenToPixel(Vector2 screenPosition, Transform transform, Sprite sprite, bool clamp)
 		{
 			Vector3 localPosition = Utility.ScreenToLocal (screenPosition, transform);
 			Vector2 uvPosition = Utility.LocalToUV (localPosition, sprite, clamp);
-			Vector2 pixelPosition = Utility.UVToPixel (uvPosition, sprite, clamp);
+			IntVector2 pixelPosition = Utility.UVToPixel(uvPosition, sprite, clamp);
 			return pixelPosition;
 		}
 
-		public static Vector2 PixelToScreen (Vector2 pixelPosition, Transform transform, Sprite sprite)
+		public static Vector2 PixelToScreen(IntVector2 pixelPosition, Transform transform, Sprite sprite)
 		{
 			return PixelToScreen (pixelPosition, transform, sprite, true);
 		}
 
-		public static Vector2 PixelToScreen (Vector2 pixelPosition, Transform transform, Sprite sprite, bool clamp)
+		public static Vector2 PixelToScreen(IntVector2 pixelPosition, Transform transform, Sprite sprite, bool clamp)
 		{
 			Vector2 uvPosition = Utility.PixelToUV (pixelPosition, sprite, clamp);
 			Vector3 localPosition = Utility.UVToLocal (uvPosition, sprite, clamp);
@@ -197,41 +198,41 @@ namespace RagePixel2
 			return screenPosition;
 		}
 
-		public static Vector2 WorldToPixel (Vector2 worldPosition)
+		public static IntVector2 WorldToPixel(Vector2 worldPosition)
 		{
-			return new Vector2(
+			return new IntVector2(
 				worldPosition.x * k_DefaultPixelsToUnits, 
 				worldPosition.y * k_DefaultPixelsToUnits
 				);
 		}
 
-		public static Vector2 PixelToWorld (Vector2 pixelPosition)
+		public static Vector2 PixelToWorld(IntVector2 pixelPosition)
 		{
 			return new Vector2(
 				pixelPosition.x / k_DefaultPixelsToUnits, 
 				pixelPosition.y / k_DefaultPixelsToUnits
 				);
-		} 
+		}
 
-		public static Vector2 WorldToPixel (Vector2 worldPosition, Transform transform, Sprite sprite)
+		public static IntVector2 WorldToPixel(Vector2 worldPosition, Transform transform, Sprite sprite)
 		{
 			return WorldToPixel (worldPosition, transform, sprite, true);
 		}
 
-		public static Vector2 WorldToPixel (Vector2 worldPosition, Transform transform, Sprite sprite, bool clamp)
+		public static IntVector2 WorldToPixel(Vector2 worldPosition, Transform transform, Sprite sprite, bool clamp)
 		{
 			Vector3 localPosition = Utility.WorldToLocal (worldPosition, transform);
 			Vector2 uvPosition = Utility.LocalToUV (localPosition, sprite, clamp);
-			Vector2 pixelPosition = Utility.UVToPixel (uvPosition, sprite, clamp);
+			IntVector2 pixelPosition = Utility.UVToPixel(uvPosition, sprite, clamp);
 			return pixelPosition;
 		}
 
-		public static Vector3 PixelToWorld (Vector2 pixelPosition, Transform transform, Sprite sprite)
+		public static Vector3 PixelToWorld(IntVector2 pixelPosition, Transform transform, Sprite sprite)
 		{
 			return PixelToWorld (pixelPosition, transform, sprite, true);
 		}
 
-		public static Vector3 PixelToWorld (Vector2 pixelPosition, Transform transform, Sprite sprite, bool clamp)
+		public static Vector3 PixelToWorld(IntVector2 pixelPosition, Transform transform, Sprite sprite, bool clamp)
 		{
 			Vector2 uvPosition = Utility.PixelToUV (pixelPosition, sprite, clamp);
 			Vector3 localPosition = Utility.UVToLocal (uvPosition, sprite, clamp);
@@ -239,29 +240,29 @@ namespace RagePixel2
 			return worldPosition;
 		}
 
-		public static bool PixelInBounds (Vector2 pixelPosition, Sprite sprite)
+		public static bool PixelInBounds(IntVector2 pixelPosition, Sprite sprite)
 		{
 			return (pixelPosition.x < sprite.rect.width && pixelPosition.y < sprite.rect.height && pixelPosition.x >= 0f && pixelPosition.y >= 0f);
 		}
 
 		public static void DrawPaintGizmo (Vector2 screenPosition, Color color, Color shadowColor, Brush brush, Transform transform, Sprite sprite, bool clamp)
 		{
-			Vector2 pixel = ScreenToPixel (screenPosition, transform, sprite, clamp);
+			IntVector2 pixel = ScreenToPixel(screenPosition, transform, sprite, clamp);
 
 			if (!clamp && !PixelInBounds (pixel, sprite))
 				return;
 
-			Vector2 minPixel = new Vector2 ((int)(pixel.x - brush.m_SizeX * .5f + .5f), (int)(pixel.y - brush.m_SizeY * .5f + .5f));
-			Vector2 maxPixel = new Vector2 ((int)(pixel.x + brush.m_SizeX * .5f + .5f), (int)(pixel.y + brush.m_SizeY * .5f + .5f));
+			IntVector2 minPixel = pixel - brush.m_BrushPivot;
+			IntVector2 maxPixel = pixel + brush.m_Size - brush.m_BrushPivot;
 
 			Vector3[] screenPolyLine = new Vector3[5];
-			screenPolyLine[0] = PixelToScreen (new Vector2 (Mathf.FloorToInt (minPixel.x), Mathf.FloorToInt (minPixel.y)), transform,
+			screenPolyLine[0] = PixelToScreen(new IntVector2(minPixel.x, minPixel.y), transform,
 				sprite);
-			screenPolyLine[1] = PixelToScreen (new Vector2 (Mathf.FloorToInt (maxPixel.x), Mathf.FloorToInt (minPixel.y)),
+			screenPolyLine[1] = PixelToScreen(new IntVector2(maxPixel.x, minPixel.y),
 				transform, sprite);
-			screenPolyLine[2] = PixelToScreen (new Vector2 (Mathf.FloorToInt (maxPixel.x), Mathf.FloorToInt (maxPixel.y)),
+			screenPolyLine[2] = PixelToScreen(new IntVector2(maxPixel.x, maxPixel.y),
 				transform, sprite);
-			screenPolyLine[3] = PixelToScreen (new Vector2 (Mathf.FloorToInt (minPixel.x), Mathf.FloorToInt (maxPixel.y)),
+			screenPolyLine[3] = PixelToScreen(new IntVector2(minPixel.x, maxPixel.y),
 				transform, sprite);
 			screenPolyLine[4] = screenPolyLine[0];
 
@@ -289,14 +290,14 @@ namespace RagePixel2
 
 		public static void DrawSpriteBounds (Color color, Color shadowColor, Transform transform, Sprite sprite)
 		{
-			Vector2 minPixel = new Vector2 (0, 0);
-			Vector2 maxPixel = new Vector2 (sprite.rect.width, sprite.rect.height);
+			IntVector2 minPixel = new IntVector2(0, 0);
+			IntVector2 maxPixel = new IntVector2(sprite.rect.width, sprite.rect.height);
 
 			Vector3[] screenPolyLine = new Vector3[5];
-			screenPolyLine[0] = PixelToScreen (new Vector2 (minPixel.x, minPixel.y), transform, sprite);
-			screenPolyLine[1] = PixelToScreen (new Vector2 (maxPixel.x, minPixel.y), transform, sprite);
-			screenPolyLine[2] = PixelToScreen (new Vector2 (maxPixel.x, maxPixel.y), transform, sprite);
-			screenPolyLine[3] = PixelToScreen (new Vector2 (minPixel.x, maxPixel.y), transform, sprite);
+			screenPolyLine[0] = PixelToScreen(new IntVector2(minPixel.x, minPixel.y), transform, sprite);
+			screenPolyLine[1] = PixelToScreen(new IntVector2(maxPixel.x, minPixel.y), transform, sprite);
+			screenPolyLine[2] = PixelToScreen(new IntVector2(maxPixel.x, maxPixel.y), transform, sprite);
+			screenPolyLine[3] = PixelToScreen(new IntVector2(minPixel.x, maxPixel.y), transform, sprite);
 			screenPolyLine[4] = screenPolyLine[0];
 
 			Vector3[] shadowPolyLine = new Vector3[5];
@@ -334,10 +335,10 @@ namespace RagePixel2
 			Handles.DrawLine (point + Vector3.forward*size, point + Vector3.back*size);
 		}
 
-		public static void DrawPixelLine (Texture2D texture, Color color, int fromX, int fromY, int toX, int toY)
+		public static void DrawPixelLine (Texture2D texture, Brush brush, IntVector2 min, IntVector2 max)
 		{
-			foreach (Vector2 pixel in GetPointsOnLine (fromX, fromY, toX, toY))
-				texture.SetPixel ((int)pixel.x, (int)pixel.y, color);
+			foreach (IntVector2 pixel in GetPointsOnLine(min.x, min.y, max.x, max.y))
+				texture.SetPixels(pixel.x - brush.m_BrushPivot.x, pixel.y - brush.m_BrushPivot.y, brush.m_Size.x, brush.m_Size.y, brush.m_Colors);
 			texture.Apply ();
 		}
 
@@ -385,7 +386,7 @@ namespace RagePixel2
 		}
 
 		// http://ericw.ca/notes/bresenhams-line-algorithm-in-csharp.html
-		private static IEnumerable<Vector2> GetPointsOnLine (int x0, int y0, int x1, int y1)
+		private static IEnumerable<IntVector2> GetPointsOnLine(int x0, int y0, int x1, int y1)
 		{
 			bool steep = Math.Abs (y1 - y0) > Math.Abs (x1 - x0);
 			if (steep)
@@ -415,7 +416,7 @@ namespace RagePixel2
 			int y = y0;
 			for (int x = x0; x <= x1; x++)
 			{
-				yield return new Vector2 ((steep ? y : x), (steep ? x : y));
+				yield return new IntVector2((steep ? y : x), (steep ? x : y));
 				error = error - dy;
 				if (error < 0)
 				{
@@ -513,24 +514,24 @@ namespace RagePixel2
 			return sprite.textureRect.width / sprite.bounds.size.x;
 		}
 
-		public static Color[] GetYReversed (Color[] colors, int sizeX, int sizeY)
+		public static Color[] GetYReversed (Color[] colors, IntVector2 size)
 		{
 			Color[] result = new Color[colors.Length];
 
 			int i = 0;
-			for (int y = sizeY - 1; y >= 0; y--)
-				for (int x = 0; x < sizeX; x++)
-					result[i++] = colors[y*sizeX + x];
+			for (int y = size.y - 1; y >= 0; y--)
+				for (int x = 0; x < size.x; x++)
+					result[i++] = colors[y*size.x + x];
 
 			return result;
 		}
 
-		public static Rect GetPixelMarqueeRect (Vector2 pixelA, Vector2 pixelB)
+		public static Rect GetPixelMarqueeRect(IntVector2 pixelA, IntVector2 pixelB)
 		{
-			int minX = Mathf.Min ((int)pixelA.x, (int)pixelB.x);
-			int minY = Mathf.Min ((int)pixelA.y, (int)pixelB.y);
-			int maxX = Mathf.Max ((int)pixelA.x, (int)pixelB.x);
-			int maxY = Mathf.Max ((int)pixelA.y, (int)pixelB.y);
+			int minX = Mathf.Min (pixelA.x, pixelB.x);
+			int minY = Mathf.Min (pixelA.y, pixelB.y);
+			int maxX = Mathf.Max (pixelA.x, pixelB.x);
+			int maxY = Mathf.Max (pixelA.y, pixelB.y);
 
 			return new Rect(minX, minY, maxX - minX, maxY - minY);
 		}

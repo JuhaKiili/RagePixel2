@@ -81,7 +81,7 @@ namespace RagePixel2
 			m_Snapshot = null;
 		}
 
-		public bool AllowRightMouseButtonDefaultBehaviour ()
+		public bool AllowPickingDefaultBehaviour ()
 		{
 			return true;
 		}

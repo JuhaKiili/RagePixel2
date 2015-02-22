@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Assets.RagePixel2.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -75,7 +76,7 @@ namespace RagePixel2
 			get
 			{
 				if (m_Brush == null)
-					m_Brush = new Brush(1, 1, paintColor);
+					m_Brush = new Brush(new IntVector2(1, 1), paintColor);
 				return m_Brush;
 			}
 			set { m_Brush = value; }
@@ -138,22 +139,22 @@ namespace RagePixel2
 			Utility.DrawSpriteBounds (new Color (1f, 1f, 1f, 0.4f), new Color (0f, 0f, 0f, 0.4f), transform, sprite);
 		}
 
-		public Vector2 ScreenToPixel (Vector2 screenPosition)
+		public IntVector2 ScreenToPixel (Vector2 screenPosition)
 		{
 			return ScreenToPixel(screenPosition, true);
 		}
 
-		public Vector2 ScreenToPixel (Vector2 screenPosition, bool clamp)
+		public IntVector2 ScreenToPixel (Vector2 screenPosition, bool clamp)
 		{
 			return Utility.ScreenToPixel (screenPosition, transform, sprite, clamp);
 		}
 
-		public Vector2 PixelToScreen (Vector2 pixelPosition)
+		public Vector2 PixelToScreen (IntVector2 pixelPosition)
 		{
 			return PixelToScreen (pixelPosition, true);
 		}
 
-		public Vector2 PixelToScreen (Vector2 pixelPosition, bool clamp)
+		public Vector2 PixelToScreen (IntVector2 pixelPosition, bool clamp)
 		{
 			return Utility.PixelToScreen (pixelPosition, transform, sprite, clamp);
 		}
@@ -225,29 +226,29 @@ namespace RagePixel2
 		public void OnSceneGUI (SceneView sceneView)
 		{
 			if (Tools.current != Tool.None)
-				OnUserToolChange ();
+				OnUserToolChange();
 
 			if (sprite == null && mode != SceneMode.CreateSprite)
 				return;
 
-			IRagePixelMode handler = GetModeHandler ();
+			IRagePixelMode handler = GetModeHandler();
 			if (handler == null)
 				return;
 
-			UpdateMouseIsDown ();
-			UpdateHotControl ();
-			UpdateCursor ();
+			UpdateMouseIsDown();
+			UpdateHotControl();
+			UpdateCursor();
 
-			if (handler.AllowRightMouseButtonDefaultBehaviour ())
-				TriggerModeEventHandler (GetModeHandler<RightMouseButtonHandler>());
+			if (handler.AllowPickingDefaultBehaviour ())
+				TriggerModeEventHandler (GetModeHandler<PickingHandler>());
 
-			if (!GetModeHandler<RightMouseButtonHandler>().active)
+			if (!GetModeHandler<PickingHandler>().active)
 				TriggerModeEventHandler (handler);
 		}
 
 		private void UpdateCursor ()
 		{
-			if (mode != SceneMode.Default)
+			if (mode != SceneMode.Default && Event.current.button == 0)
 				EditorGUIUtility.AddCursorRect (new Rect (0, 0, 10000, 10000), MouseCursor.ArrowPlus);
 		}
 
@@ -263,9 +264,9 @@ namespace RagePixel2
 		{
 			int id = GUIUtility.GetControlID ("RagePixel".GetHashCode (), FocusType.Passive);
 
-			if (Event.current.type == EventType.MouseDown)
+			if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 				GUIUtility.hotControl = id;
-			if (Event.current.type == EventType.MouseUp)
+			if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 				GUIUtility.hotControl = 0;
 		}
 

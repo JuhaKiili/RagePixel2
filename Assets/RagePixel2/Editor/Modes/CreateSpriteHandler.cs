@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Assets.RagePixel2.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
@@ -16,8 +17,8 @@ namespace RagePixel2
 		{
 			get
 			{
-				Vector2 p1 = Utility.WorldToPixel (dragStartWorld);
-				Vector2 p2 = Utility.WorldToPixel (dragEndWorld);
+				IntVector2 p1 = Utility.WorldToPixel(dragStartWorld);
+				IntVector2 p2 = Utility.WorldToPixel(dragEndWorld);
 				return Utility.GetPixelMarqueeRect (p1, p2);
 			}
 		}
@@ -34,12 +35,12 @@ namespace RagePixel2
 
 		private Vector2 worldMinPointSnapped
 		{
-			get { return Utility.PixelToWorld (new Vector2 (pixelRect.xMin, pixelRect.yMin)); }
+			get { return Utility.PixelToWorld(new IntVector2(pixelRect.xMin, pixelRect.yMin)); }
 		}
 
 		private Vector2 worldMaxPointSnapped
 		{
-			get { return Utility.PixelToWorld (new Vector2 (pixelRect.xMax, pixelRect.yMax)); }
+			get { return Utility.PixelToWorld(new IntVector2(pixelRect.xMax, pixelRect.yMax)); }
 		}
 
 		public void OnSceneGUI (RagePixelState state)
@@ -129,7 +130,7 @@ namespace RagePixel2
 			get { return m_DragStart.x <= Event.current.mousePosition.x; }
 		}
 
-		public bool AllowRightMouseButtonDefaultBehaviour ()
+		public bool AllowPickingDefaultBehaviour ()
 		{
 			return false;
 		}

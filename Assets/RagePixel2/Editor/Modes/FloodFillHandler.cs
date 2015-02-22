@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.RagePixel2.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace RagePixel2
 		{
 			if (Event.current.button == 0)
 			{
-				Vector2 pixel = state.ScreenToPixel (Event.current.mousePosition, false);
+				IntVector2 pixel = state.ScreenToPixel(Event.current.mousePosition, false);
 				Color oldColor = state.sprite.texture.GetPixel ((int)pixel.x, (int)pixel.y);
 				Texture2D texture = state.sprite.texture;
 				Rect spriteRect = state.sprite.textureRect;
@@ -51,7 +52,7 @@ namespace RagePixel2
 			state.DrawSpriteBounds ();
 		}
 
-		public bool AllowRightMouseButtonDefaultBehaviour ()
+		public bool AllowPickingDefaultBehaviour ()
 		{
 			return true;
 		}
