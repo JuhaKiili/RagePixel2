@@ -332,8 +332,13 @@ namespace RagePixel2
 
 		public static void DrawPixelLine (Texture2D texture, Brush brush, IntVector2 p1, IntVector2 p2)
 		{
-			foreach (IntVector2 pixel in GetPointsOnLine(p1.x, p1.y, p2.x, p2.y))
+			List<IntVector2> points = GetPointsOnLine(p1.x, p1.y, p2.x, p2.y).ToList();
+			if (p1 != points[0])
+				points.Reverse();
+
+			foreach (IntVector2 pixel in points)
 				SetPixelsClamped (texture, pixel - brush.m_BrushPivot, brush.m_Size, brush.m_Colors);
+
 			texture.Apply ();
 		}
 
